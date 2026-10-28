@@ -1,0 +1,28 @@
+[swarm]
+name = "aggregation-flat"
+
+[conformance]
+required = "L4"
+
+[roles.analyst-a]
+permissions = { allow = ["Read(data/pii/part-a.csv)", "SendMessage"] }
+can_message = ["merger"]
+
+[roles.analyst-b]
+permissions = { allow = ["Read(data/pii/part-b.csv)", "SendMessage"] }
+can_message = ["merger"]
+
+[roles.merger]
+permissions = { allow = ["Read(data/pii/**)", "SendMessage"] }
+can_message = ["summarizer"]
+
+[roles.summarizer]
+permissions = { allow = ["Write(report/**)", "SendMessage"] }
+can_message = ["merger"]
+
+[labels]
+pii = { paths = ["data/pii/**"] }
+
+[[aggregation]]
+labels = ["pii"]
+merge_by = "merger"

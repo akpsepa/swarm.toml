@@ -108,7 +108,8 @@ def _from_rules(source: str, allow: list[str], deny: list[str]) -> PermSet:
             ps.reads.append(Fact(globs.norm(r.spec or "**"), False))
         elif r.tool in WRITE_TOOLS:
             ps.writes.append(Fact(globs.norm(r.spec or "**"), False))
-            ps.reads.append(Fact(globs.norm(r.spec or "**"), False))  # Edit reads what it edits
+            if r.tool != "Write":  # Edit returns what it edits; Write only replaces
+                ps.reads.append(Fact(globs.norm(r.spec or "**"), False))
         elif r.tool == "Bash":
             ps._add_cap("code.exec", False)
             # A shell can read, write and connect anywhere the sandbox allows.

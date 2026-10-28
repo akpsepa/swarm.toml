@@ -9,6 +9,7 @@ import pytest
 
 from swarm_toml.compile.claude_code import build_policy, conformance
 from swarm_toml.enforce.decide import (
+    C2_CLAUSES,
     ROOT,
     Decision,
     HookEvent,
@@ -577,16 +578,16 @@ def test_aggregation_through_messages(tmp_path):
     assert r.call("SendMessage", who="id-b1", to="a1", message="no data").allow
 
 
-def test_merged_output_counts_once(tmp_path):
+def test_merger_output_carries_no_fragments(tmp_path):
     p = policy_from(tmp_path, AGG)
     r = Run(p)
     r.spawn("a", "a1")
     r.call("Read", file_path="data/pii/x")
     r.call("mcp__crm__read", q="y")
     assert r.call("SendMessage", to="a1", message="merged summary").allow
-    assert r.call("SendMessage", to="a1", message="again").allow
-    d = r.call("Read", who="id-a1", file_path="data/pii/z")  # merged + a raw fragment
-    assert not d.allow and d.rule == "aggregation"
+    assert r.led["frags"].get("id-a1", []) == []
+    assert r.call("Read", who="id-a1", file_path="data/pii/z").allow  # one raw fragment
+    assert r.call("mcp__crm__read", who="id-a1").rule == "aggregation"  # a second one
 
 
 def test_label_tool_as_rule(tmp_path):
@@ -654,3 +655,40 @@ def test_label_in_second_aggregation(tmp_path):
     r.spawn("b", "b1")
     assert r.call("mcp__ops__read", who="id-b1").allow
     assert r.call("Read", who="id-b1", file_path="data/pii/x").allow  # different merger
+
+
+def test_c2_mode_skips_inter_agent_clauses(hier, tmp_path):
+    """C2 enforces per-agent permissions and delegation limits only."""
+    p = copy.deepcopy(hier)
+    p["enforce"] = list(C2_CLAUSES)
+    p["roles"]["lead"]["can_assign"] = []  # would be an assign-edges denial in C3
+    p["roles"]["reviewer"]["budget"] = {"tokens": 10_000}  # would exceed lead's budget
+    r = Run(p)
+    assert r.spawn("reviewer", "r1").allow
+    assert r.spawn("coder", "c1").allow and r.spawn("coder", "c2").allow
+    assert r.spawn("coder", "c3").allow  # max_instances = 2 not enforced
+    assert r.call("SendMessage", who="id-r1", to="c1", message="x").allow  # no edge
+    assert r.call("Read", who="id-c1", file_path="notes/n.md").rule == "permissions"
+    assert r.call("mcp__deploy__run", who="id-c1").rule == "non-delegable"
+    r.ev("SubagentStop", agent_id="id-c1", facts={"tokens_used": 10**6})
+    assert r.call("Read", who="id-c1", file_path="src/a.py").allow  # budget off
+    q = copy.deepcopy(policy_from(tmp_path, QUORUM, name="q"))
+    q["enforce"] = list(C2_CLAUSES)
+    rq = Run(q)
+    rq.spawn("editor", "ed")
+    assert rq.call("Write", who="id-ed", file_path="report/published/x", content="x").allow
+    a = copy.deepcopy(policy_from(tmp_path, AGG, name="agg"))
+    a["enforce"] = list(C2_CLAUSES)
+    ra = Run(a)
+    ra.spawn("a", "a1")
+    ra.spawn("b", "b1")
+    ra.call("Read", who="id-a1", file_path="data/pii/x")
+    assert ra.call("mcp__crm__read", who="id-a1").allow
+    assert ra.call("SendMessage", who="id-a1", to="b1", message="x").allow
+    h = copy.deepcopy(hier)
+    h["enforce"] = list(C2_CLAUSES)
+    h["roles"]["lead"]["allow"] += ["Write(notes/**)"]
+    h["roles"]["coder"]["allow"] += ["Read(notes/**)"]
+    rh = Run(h)
+    rh.spawn("coder", "c1")
+    assert rh.call("Read", who="id-c1", file_path="notes/n.md").allow  # channels off

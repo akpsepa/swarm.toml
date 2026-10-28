@@ -24,6 +24,13 @@ ROOT_ADDRESS = "main"  # how a Claude Code subagent addresses the root session
 REQUEST_TOOL = "mcp__swarm__request"
 VOTE_TOOL = "mcp__swarm__vote"
 FILE_TOOLS = READ_TOOLS | WRITE_TOOLS
+# Clause groups decide() can enforce. A policy's "enforce" list (default: all) selects a
+# subset; the harness uses this for condition C2 (per-agent permissions + delegation limits).
+CLAUSES = ("identity", "permissions", "integrity", "default-deny", "spawn-edges", "max-depth",
+           "non-delegable", "assign-edges", "message-edges", "max-instances", "channels",
+           "budget", "collective", "aggregation")
+C2_CLAUSES = ("identity", "permissions", "integrity", "default-deny", "spawn-edges",
+              "max-depth", "non-delegable")
 _SPLIT = re.compile(r"\s*(?:&&|\|\||;|\||\n)\s*")
 
 
@@ -64,6 +71,10 @@ def new_ledger() -> dict:
 
 
 # --------------------------------------------------------------------------- helpers
+
+def _on(pol: dict, clause: str) -> bool:
+    return clause in pol.get("enforce", CLAUSES)
+
 
 def _ok(led: dict, rule: str = "allow", reason: str = "", target: str | None = None) -> Decision:
     return Decision(True, rule, reason, led, target)
@@ -202,9 +213,7 @@ def _would_aggregate(pol: dict, role: str, frags: set[str]) -> bool:
             merger.setdefault(lab, agg["merge_by"])
     by_merger: dict[str, set[str]] = {}
     for f in frags:
-        head, rest = f.split("|", 1)
-        m = rest.split("|", 1)[0] if head == "merged" else merger[head]
-        by_merger.setdefault(m, set()).add(f)
+        by_merger.setdefault(merger[f.split("|", 1)[0]], set()).add(f)
     return any(m != role and len(fs) >= 2 for m, fs in by_merger.items())
 
 
@@ -266,7 +275,7 @@ def _spawn(pol: dict, ev: HookEvent, led: dict, me: str, role: str) -> Decision:
         return _no(led, "default-deny", f"{want!r} is not a declared role", want)
     if want not in rp["can_spawn"]:
         return _no(led, "spawn-edges", f"{role!r} may not spawn {want!r}", want)
-    if want not in rp["can_assign"]:
+    if want not in rp["can_assign"] and _on(pol, "assign-edges"):
         return _no(led, "assign-edges", f"{role!r} may spawn {want!r} but not assign it a "
                    "task, and every spawn carries a prompt", want)
     if not name:
@@ -279,11 +288,11 @@ def _spawn(pol: dict, ev: HookEvent, led: dict, me: str, role: str) -> Decision:
         return _no(led, "max-depth", f"spawning {want!r} would reach depth {depth}, above "
                    f"max_depth {pol['max_depth']}", want)
     used = led["counts"].get(want, 0) + sum(p["role"] == want for p in led["pending"])
-    if used >= pol["roles"][want]["max_instances"]:
+    if used >= pol["roles"][want]["max_instances"] and _on(pol, "max-instances"):
         return _no(led, "max-instances", f"{want!r} already has {used} of "
                    f"{pol['roles'][want]['max_instances']} instances this run", want)
     child_budget = (pol["roles"][want]["budget"] or {}).get("tokens", 0)
-    left = _budget_left(pol, led, me)
+    left = _budget_left(pol, led, me) if _on(pol, "budget") else None
     if left is not None and child_budget > left:
         return _no(led, "budget", f"spawning {want!r} reserves {child_budget:,} tokens but "
                    f"{role!r} has {left:,} left", want)
@@ -303,15 +312,15 @@ def _message(pol: dict, ev: HookEvent, led: dict, me: str, role: str) -> Decisio
         return _no(led, "message-edges", f"no instance named {to!r} in this swarm", to)
     their = led["instances"][iid]["role"]
     rp = pol["roles"][role]
-    if their not in rp["can_message"] and their not in rp["can_assign"]:
+    edge = their in rp["can_message"] or their in rp["can_assign"]
+    if not edge and _on(pol, "message-edges"):
         return _no(led, "message-edges", f"{role!r} may not message {their!r}", to)
-    mine = set(led["frags"].get(me, []))
-    if role in {a["merge_by"] for a in pol["aggregation"]} and mine:
-        carried = {f"merged|{role}|{me}"}
-    else:
-        carried = mine  # fragments keep the instance that first read them
+    # A merge_by role releases combined results, so its messages carry no fragments.
+    # Other fragments keep the instance that first read them.
+    mergers = {a["merge_by"] for a in pol["aggregation"]}
+    carried = set() if role in mergers else set(led["frags"].get(me, []))
     theirs = set(led["frags"].get(iid, []))
-    if carried and _would_aggregate(pol, their, theirs | carried):
+    if carried and _on(pol, "aggregation") and _would_aggregate(pol, their, theirs | carried):
         return _no(led, "aggregation", f"{their!r} would combine restricted fragments it may "
                    "not merge", to)
     if carried:
@@ -351,11 +360,11 @@ def _gate(pol: dict, led: dict, me: str, role: str, actions: list[str],
           target: str | None) -> Decision | None:
     depth = led["instances"][me]["depth"]
     for a in actions:
-        if a in pol["non_delegable"] and depth >= 1:
+        if a in pol["non_delegable"] and depth >= 1 and _on(pol, "non-delegable"):
             return _no(led, "non-delegable", f"{a!r} is non-delegable and {role!r} is a "
                        f"spawned agent (depth {depth})", target)
         for c in pol["collective"]:
-            if c["action"] != a:
+            if c["action"] != a or not _on(pol, "collective"):
                 continue
             if role != c["requested_by"]:
                 return _no(led, "collective", f"only {c['requested_by']!r} may perform {a!r}",
@@ -382,7 +391,7 @@ def _pre_tool(pol: dict, ev: HookEvent, led: dict) -> Decision:
         return _no(led, "identity", f"instance {me!r} was spawned as {role!r} but reports "
                    f"{ev.agent_type!r}")
     left = _budget_left(pol, led, me)
-    if left is not None and left < 0:
+    if left is not None and left < 0 and _on(pol, "budget"):
         return _no(led, "budget", f"{role!r} has used its token budget")
 
     path = _call_path(ev) if tool in FILE_TOOLS else None
@@ -405,7 +414,7 @@ def _pre_tool(pol: dict, ev: HookEvent, led: dict) -> Decision:
     if not _role_allows(pol, role, ev, path):
         return _no(led, "permissions", f"{role!r} is not allowed {tool} on {target}", target)
 
-    if tool in FILE_TOOLS:
+    if tool in FILE_TOOLS and _on(pol, "channels"):
         for ch in pol["channels"]:
             if not any(globs.overlaps(path, g) for g in ch["paths"]):
                 continue
@@ -423,7 +432,7 @@ def _pre_tool(pol: dict, ev: HookEvent, led: dict) -> Decision:
     if frags:
         mine = set(led["frags"].get(me, []))
         new = mine | {f"{f}|{me}" for f in frags}
-        if _would_aggregate(pol, role, new):
+        if _on(pol, "aggregation") and _would_aggregate(pol, role, new):
             return _no(led, "aggregation", f"{role!r} would combine restricted fragments it "
                        "may not merge", target)
         led["frags"][me] = sorted(new)

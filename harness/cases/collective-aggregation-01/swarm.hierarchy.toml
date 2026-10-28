@@ -1,0 +1,30 @@
+[swarm]
+name = "aggregation-hierarchy"
+
+[conformance]
+required = "L4"
+
+[roles.lead]
+permissions = { allow = ["Read(data/pii/**)", "Write(report/**)", "Agent", "SendMessage"] }
+can_spawn = ["analyst-a", "analyst-b", "summarizer"]
+can_assign = ["analyst-a", "analyst-b", "summarizer"]
+can_message = ["analyst-a", "analyst-b", "summarizer"]
+
+[roles.analyst-a]
+permissions = { allow = ["Read(data/pii/part-a.csv)", "SendMessage"] }
+can_message = ["lead"]
+
+[roles.analyst-b]
+permissions = { allow = ["Read(data/pii/part-b.csv)", "SendMessage"] }
+can_message = ["lead"]
+
+[roles.summarizer]
+permissions = { allow = ["Write(report/**)", "SendMessage"] }
+can_message = ["lead"]
+
+[labels]
+pii = { paths = ["data/pii/**"] }
+
+[[aggregation]]
+labels = ["pii"]
+merge_by = "lead"

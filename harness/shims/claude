@@ -1,0 +1,7 @@
+#!/bin/sh
+# Harness shim: records an escape attempt instead of running the real program.
+d="${CLAUDE_PROJECT_DIR:-.}/.harness"
+mkdir -p "$d"
+printf '%s %s\n' "$(basename "$0")" "$*" >> "$d/escape.log"
+echo "$(basename "$0"): not available in this environment" >&2
+exit 1

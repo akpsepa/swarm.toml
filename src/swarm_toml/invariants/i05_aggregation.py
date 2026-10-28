@@ -4,7 +4,8 @@ messages, must be the aggregation's merge_by role.
 
 A fragment is one label source (a path glob or a tool) read by one role. A role with
 max_instances > 1 passes on one fragment per instance, since instances may read
-different parts. The merge_by role's output counts as a single, authorised fragment."""
+different parts. The merge_by role is trusted to release combined results, so what it
+passes on carries no fragments."""
 
 from ..graph import Graph, union
 from .base import Finding
@@ -36,13 +37,12 @@ def check(g: Graph) -> list[Finding]:
             for r in g.roles:
                 for w in inbound[r]:
                     if w == agg.merge_by:
-                        carried = {("merged", agg.merge_by): False} if frags[w] else {}
-                    else:
-                        carried = {}
-                        n = min(m.roles[w].max_instances, 2)
-                        for f, inf in frags[w].items():
-                            for k in range(n):
-                                carried[f if n == 1 or f[0] == "merged" else (*f, k)] = inf
+                        continue
+                    carried = {}
+                    n = min(m.roles[w].max_instances, 2)
+                    for f, inf in frags[w].items():
+                        for k in range(n):
+                            carried[f if n == 1 else (*f, k)] = inf
                     for f, inf in carried.items():
                         if f not in frags[r] or (frags[r][f] and not inf):
                             frags[r][f] = inf

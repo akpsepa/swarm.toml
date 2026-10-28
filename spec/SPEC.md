@@ -144,7 +144,8 @@ A reference that cannot be resolved makes every fact about that role *inferred* 
 | Rule | Derived fact | Provenance |
 | --- | --- | --- |
 | `Read`, `Grep`, `Glob`, `LS` (spec) | reads the glob (`**` if no spec) | declared |
-| `Write`, `Edit`, `MultiEdit`, `NotebookEdit` (spec) | writes and reads the glob | declared |
+| `Write` (spec) | writes the glob | declared |
+| `Edit`, `MultiEdit`, `NotebookEdit` (spec) | writes and reads the glob (an edit returns what it changes) | declared |
 | `Bash` (any spec) | `code.exec` | declared |
 | `Bash` (any spec) | reads and writes `**`; `network.egress` | **inferred**: a shell command cannot be parsed for paths or hosts |
 | `WebFetch`, `WebSearch` | `network.egress` | declared |
@@ -207,7 +208,7 @@ If the enforcer cannot load or verify the policy, it refuses every call.
 | I9 | **Independent voters (R6).** With `independent = true`, the requester is not the voter role and has no path in the control graph to it. In every quorum, `min ≤ max_instances` of the voter role | static |
 | I10 | **Default deny.** `default = "deny"`, and every role, label and action the file names is declared | static |
 
-**Fragments (I5).** A fragment is one source (path glob or tool) of one label, read by one role. Fragments flow along spawn, assign, message and channel edges. A role with `max_instances > 1` passes on each fragment once per instance, since instances may read different parts. The output of `merge_by` counts as a single authorised fragment. This over-approximates. It is experimental in v0.1, and results MUST report what it does not catch.
+**Fragments (I5).** A fragment is one source (path glob or tool) of one label, read by one role. Fragments flow along spawn, assign, message and channel edges. A role with `max_instances > 1` passes on each fragment once per instance, since instances may read different parts. The `merge_by` role is trusted to release combined results, so what it passes on carries no fragments. This over-approximates. It is experimental in v0.1, and results MUST report what it does not catch.
 
 ### 5.1 Severity
 

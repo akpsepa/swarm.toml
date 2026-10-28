@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Reference implementation and research harness for swarm.toml"
 license = "Apache-2.0"
 requires-python = ">=3.11"
-dependencies = ["pydantic>=2.7"]
+dependencies = ["pydantic>=2.7", "pyyaml>=6"]
 
 [project.scripts]
 swarm = "swarm_toml.check:main"
