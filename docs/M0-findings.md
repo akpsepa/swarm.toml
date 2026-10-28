@@ -73,8 +73,18 @@ Top-level keys by event (2.1.312). `agent_id` is present only for subagents.
 - **Quota tracking.** Each run's stream includes a `rate_limit_event` with `five_hour` and `seven_day` utilisation, rounded to 2 decimals. The harness should log it before and after every run and stop at a configured ceiling. That is more reliable than a token-to-quota conversion that Anthropic does not publish.
 - **Projection (not yet a go/no-go).** At about 0.3% of the 5-hour window per toy run, the 5-hour window caps a session at about 300 toy-sized runs. Real cases with attackers and benign tasks will likely be 5–20× larger. The weekly fit cannot be judged until one realistic M6 case is measured. Re-check at the M5 dry run, before freezing the seed count in `prereg/`.
 
+## M4 live checks (compiled enforcer under `claude -p`)
+
+Spike: `spikes/m4_live.py`, runs `m4-live1` and `m4-live2`. Lead → reviewer (background) and coder, with the compiled `swarm-hook`. Every expected allow and deny landed, and every decision appears in `.swarm/audit.jsonl`: helper spawn denied (`spawn-edges`), `swarm.toml` write denied (`integrity`), coder → main denied (`message-edges`), reviewer → main delivered.
+
+8. **The root's `SendMessage` address is `"main"`.** It is not the role name; `lead`, `parent` and `team-lead` are all "not reachable". The tool description says `"main"` works for background subagents only. The enforcer aliases `main` to the root instance.
+9. **`settings.json` deny rules fire before `PreToolUse` hooks.** A denied call never reaches the hook, so it is never audited. The compiler therefore emits no deny rules, and the hook denies protected writes itself. (In run 1, the `dontAsk` denial and the hook both fired on one call, so the order depends on the kind of permission decision.)
+10. **Project `permissions.allow` is ignored in an untrusted workspace.** stderr: "Ignoring 4 permissions.allow entries from .claude/settings.json: this workspace has not been trusted". Deny rules and hooks still apply. In M0, `Write` succeeded because of `acceptEdits`, not the allow list. The harness must pass permissions with `--settings <file>` (for C2 especially) and run with `stdin` from `/dev/null`.
+11. **Safety: subagents can reach other local Claude sessions.** `ListAgents` from inside a swarm subagent lists every local session, including the researcher's own interactive session, and `SendMessage` can address them. The compiled hook denies them, since an unknown name fails default deny. **C0–C2 have no such hook, so the harness must add a guard that denies `SendMessage` to any name outside the run in every condition.** This is a guardrail, not a condition variable.
+12. **Metering on every call works.** A subagent's transcript is at `<session>/subagents/agent-<agent_id>.jsonl`, derivable from `transcript_path` and `agent_id` in `PreToolUse`. Budgets are therefore enforced from the first call after the limit, not only at `SubagentStop`.
+
 ## Open items
 
-- [ ] Spawn-chain binding under parallel same-type spawns (consequence 2).
+- [ ] Spawn-chain binding under parallel same-type spawns (consequence 2). The enforcer binds `SubagentStart` to the oldest pending spawn of that type (FIFO), so the name and parent can be swapped between two same-type siblings. Their role and depth are still correct.
 - [ ] Whether `SessionStart` with `source: "resume"` fires on agent revival; it did not in these runs.
 - [ ] Which real deployment to use for M8 (owner's decision).

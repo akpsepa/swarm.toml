@@ -9,6 +9,8 @@ dependencies = ["pydantic>=2.7"]
 [project.scripts]
 swarm = "swarm_toml.check:main"
 swarm-check = "swarm_toml.check:check_main"
+swarm-hook = "swarm_toml.enforce.hook:main"
+swarm-vote = "swarm_toml.enforce.vote_mcp:main"
 
 [dependency-groups]
 dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6"]

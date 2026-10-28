@@ -30,8 +30,8 @@ def test_golden(name, tmp_path):
     want = {p.relative_to(gdir).as_posix(): p.read_text()
             for p in gdir.rglob("*") if p.is_file()}
     assert sorted(got) == sorted(want)
-    for rel in want:
-        assert got[rel] == want[rel], rel
+    for rel, text in want.items():
+        assert got[rel] == text, rel
 
 
 def test_every_clause_has_a_status():

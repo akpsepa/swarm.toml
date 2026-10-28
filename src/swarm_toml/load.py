@@ -105,12 +105,19 @@ class Swarm:
 
     def digest(self) -> str:
         """sha256 over swarm.toml and every file it references, in a stable order."""
-        h = hashlib.sha256()
-        for p in [self.path, *sorted(set(self.referenced))]:
-            h.update(self.rel(p).encode() + b"\0")
-            h.update(p.read_bytes() if p.is_file() else b"<missing>")
-            h.update(b"\0")
-        return "sha256:" + h.hexdigest()
+        return digest_files(self.root_dir, [self.rel(p) for p in self.referenced])
+
+
+def digest_files(root: Path, referenced: list[str]) -> str:
+    """The policy hash: swarm.toml plus the referenced files (repo-relative), in order.
+    The enforcer recomputes this from disk on every call (R1)."""
+    h = hashlib.sha256()
+    for rel in [FILENAME, *sorted(set(referenced))]:
+        p = root / rel
+        h.update(rel.encode() + b"\0")
+        h.update(p.read_bytes() if p.is_file() else b"<missing>")
+        h.update(b"\0")
+    return "sha256:" + h.hexdigest()
 
 
 def _pydantic_problems(err: ValidationError, loc: Locator) -> list[tuple[int, str]]:

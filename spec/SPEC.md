@@ -241,9 +241,10 @@ A compiler MUST list every clause the target cannot enforce. It MUST refuse to e
 
 ### 6.1 Claude Code target notes (2.1.312; see `docs/M0-findings.md`)
 
-- Identity comes from hook `agent_type` and `agent_id`. The root has no `agent_id` and is identified by `--agent <role>`. Hooks carry neither the instance `name` nor the parent, so the enforcer keeps its own spawn ledger.
+- Identity comes from hook `agent_type` and `agent_id`. The root has no `agent_id`, is identified by `--agent <role>` and is addressed as `"main"` in `SendMessage`. Hooks carry neither the instance `name` nor the parent, so the enforcer keeps its own spawn ledger and requires `name` on every spawn.
+- `SendMessage` can reach other Claude sessions on the same machine. Default deny refuses every name not bound in the run.
 - **There is no `TaskCreate` tool.** Assign edges are enforced on the `Agent` prompt at spawn and on `SendMessage` to a running instance that was spawned by the sender.
-- Budgets are metered from transcripts at `SubagentStop`, which requires session persistence, so L4 budget enforcement is approximate (after the fact).
+- Budgets are metered from the caller's transcript on every call, which requires session persistence. L4 budget enforcement is approximate: the call that crosses the limit completes, and the next is refused.
 - `Bash` cannot be parsed for paths or hosts. Without a sandbox, any role with `Bash` can escape and can write any path. Claude Code's sandbox applies per session, not per agent.
 
 ## 7. Not in v0.1

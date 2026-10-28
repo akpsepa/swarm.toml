@@ -19,7 +19,7 @@
       "id": "identity",
       "level": "L3",
       "status": "enforced",
-      "how": "role from hook agent_type/agent_id; root from --agent; spawn ledger keeps names and parents"
+      "how": "role from hook agent_type/agent_id; root from --agent, addressed as \"main\"; spawn ledger keeps names and parents"
     },
     {
       "id": "spawn-edges",
@@ -49,7 +49,7 @@
       "id": "message-edges",
       "level": "L3",
       "status": "enforced",
-      "how": "PreToolUse on SendMessage: recipient name -> role via the ledger; unknown names and broadcasts denied"
+      "how": "PreToolUse on SendMessage: recipient name -> role via the ledger; unknown names (including other local Claude sessions) and broadcasts denied"
     },
     {
       "id": "default-deny",
@@ -73,7 +73,7 @@
       "id": "budget",
       "level": "L4",
       "status": "approximate",
-      "how": "metered from transcripts at SubagentStop (needs session persistence); spawns reserve budget; calls refused once metered use exceeds it"
+      "how": "metered from the caller's transcript on every call and at SubagentStop (needs session persistence); spawns reserve budget; the first call after the budget is exceeded is refused"
     },
     {
       "id": "collective",

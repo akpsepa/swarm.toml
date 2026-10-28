@@ -14,18 +14,6 @@
       "WebFetch",
       "WebSearch",
       "Write"
-    ],
-    "deny": [
-      "Edit(./.claude/**)",
-      "Edit(./.claude/agents/writer.md)",
-      "Edit(./.swarm/**)",
-      "Edit(./.swarm/audit.jsonl)",
-      "Edit(./swarm.toml)",
-      "Write(./.claude/**)",
-      "Write(./.claude/agents/writer.md)",
-      "Write(./.swarm/**)",
-      "Write(./.swarm/audit.jsonl)",
-      "Write(./swarm.toml)"
     ]
   },
   "hooks": {

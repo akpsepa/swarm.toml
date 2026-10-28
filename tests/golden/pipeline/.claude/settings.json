@@ -9,18 +9,6 @@
       "SendMessage",
       "Write",
       "mcp__crm__read"
-    ],
-    "deny": [
-      "Edit(./.agents/permissions.json)",
-      "Edit(./.claude/**)",
-      "Edit(./.swarm/**)",
-      "Edit(./.swarm/audit.jsonl)",
-      "Edit(./swarm.toml)",
-      "Write(./.agents/permissions.json)",
-      "Write(./.claude/**)",
-      "Write(./.swarm/**)",
-      "Write(./.swarm/audit.jsonl)",
-      "Write(./swarm.toml)"
     ]
   },
   "hooks": {

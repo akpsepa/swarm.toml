@@ -58,8 +58,8 @@ def conformance(g: Graph) -> list[Clause]:
                "hook checks every call against the role's allow rules; Bash rules match "
                "each subcommand by prefix"),
         Clause("identity", "L3", "enforced",
-               "role from hook agent_type/agent_id; root from --agent; spawn ledger keeps "
-               "names and parents"),
+               "role from hook agent_type/agent_id; root from --agent, addressed as \"main\"; "
+               "spawn ledger keeps names and parents"),
         Clause("spawn-edges", "L3", "enforced", "PreToolUse on Agent: caller role vs can_spawn"),
         Clause("max-depth", "L3", "enforced", "depth from the spawn ledger at PreToolUse Agent"),
         Clause("max-instances", "L3", "enforced",
@@ -69,7 +69,7 @@ def conformance(g: Graph) -> list[Clause]:
                "instance the sender spawned are treated as assignments"),
         Clause("message-edges", "L3", "enforced",
                "PreToolUse on SendMessage: recipient name -> role via the ledger; unknown "
-               "names and broadcasts denied"),
+               "names (including other local Claude sessions) and broadcasts denied"),
         Clause("default-deny", "L3", "enforced", "tools, roles and recipients not declared are denied"),
     ]
     if m.channel:
@@ -93,8 +93,9 @@ def conformance(g: Graph) -> list[Clause]:
     budgeted = [r for r in g.roles if roles[r].budget]
     if budgeted:
         c.append(Clause("budget", "L4", "approximate",
-                        "metered from transcripts at SubagentStop (needs session persistence); "
-                        "spawns reserve budget; calls refused once metered use exceeds it"))
+                        "metered from the caller's transcript on every call and at SubagentStop "
+                        "(needs session persistence); spawns reserve budget; the first call "
+                        "after the budget is exceeded is refused"))
     if m.aggregation:
         c.append(Clause("aggregation", "L4", "approximate" if execs else "enforced",
                         "fragments tracked per instance on file-tool reads, labelled tools and "
@@ -186,14 +187,14 @@ def agent_markdown(g: Graph, role: str, policy: dict) -> str:
     tools = _agent_tools(g, role, policy)
     pr = policy["roles"][role]
     lines = ["---", f"name: {role}",
-             f"description: The {role} role of the {policy['swarm']} swarm (compiled from "
-             "swarm.toml; do not edit)"]
+             (f"description: The {role} role of the {policy['swarm']} swarm (compiled from "
+             "swarm.toml; do not edit)")]
     if tools is not None:
         lines.append(f"tools: {', '.join(tools)}")
     lines += ["---", "",
               f"You are an instance of the `{role}` role in the `{policy['swarm']}` swarm.",
-              "Every tool call you make is checked against the swarm's policy. A denied call "
-              "returns the rule and the reason; do not try to work around a denial."]
+              ("Every tool call you make is checked against the swarm's policy. A denied call "
+              "returns the rule and the reason; do not try to work around a denial.")]
     peers = []
     if pr["can_spawn"]:
         peers.append(f"You may spawn: {', '.join(pr['can_spawn'])}. Always give each spawned "
@@ -209,7 +210,7 @@ def settings_json(g: Graph, policy: dict, hook_cmd: str) -> dict:
     # Session-wide allows are bare tool names: per-role paths and patterns are enforced by
     # the hook, so settings.json never refuses a call the policy allows.
     allow: set[str] = set()
-    for name, pr in policy["roles"].items():
+    for pr in policy["roles"].values():
         rules = pr["allow"] if pr["allow"] is not None else sorted(ALL_TOOLS)
         allow.update(r.split("(", 1)[0] for r in rules)
         if pr["can_spawn"]:
@@ -219,9 +220,8 @@ def settings_json(g: Graph, policy: dict, hook_cmd: str) -> dict:
     if policy["collective"]:
         allow.update(VOTE_TOOLS)
     allow.discard("Task")
-    deny = []
-    for p in policy["protected"]:
-        deny += [f"Write(./{p})", f"Edit(./{p})"]
+    # No deny rules: Claude Code applies settings denies before PreToolUse hooks, so those
+    # refusals would never reach the audit log. The hook denies protected writes itself.
 
     def hook(ev: str) -> dict:
         return {"type": "command", "command": f"{hook_cmd} {ev}", "timeout": 30}
@@ -234,7 +234,7 @@ def settings_json(g: Graph, policy: dict, hook_cmd: str) -> dict:
         elif ev == "PostToolUse":
             entry = {"matcher": "Agent|SendMessage", **entry}
         hooks[ev] = [entry]
-    return {"permissions": {"allow": sorted(allow), "deny": sorted(deny)}, "hooks": hooks}
+    return {"permissions": {"allow": sorted(allow)}, "hooks": hooks}
 
 
 def mcp_json(vote_cmd: str) -> dict:
@@ -243,8 +243,8 @@ def mcp_json(vote_cmd: str) -> dict:
 
 def report_text(s: Swarm, clauses: list[Clause]) -> str:
     req = s.model.conformance.required
-    rows = [f"Conformance report: {s.name} -> {TARGET} (Claude Code {CC_VERSION}), "
-            f"required {req}", ""]
+    rows = [(f"Conformance report: {s.name} -> {TARGET} (Claude Code {CC_VERSION}), "
+            f"required {req}"), ""]
     w = max(len(c.id) for c in clauses)
     for c in sorted(clauses, key=lambda c: (_lvl(c.level), c.id)):
         mark = "BLOCKS" if c in blocking(clauses, req) else ""
