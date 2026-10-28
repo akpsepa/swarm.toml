@@ -1,0 +1,8 @@
+# For downstream repos: add this repo to .pre-commit-config.yaml to run `swarm check`.
+- id: swarm-check
+  name: swarm check
+  description: Validate swarm.toml against invariants I1-I10
+  entry: swarm-check
+  language: python
+  files: (^|/)(swarm\.toml|\.agents/permissions\.json|\.claude/agents/.*\.md)$
+  pass_filenames: false

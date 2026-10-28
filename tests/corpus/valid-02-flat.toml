@@ -1,0 +1,18 @@
+# expect: none
+# seed: flat peer group with a declared channel
+[conformance]
+required = "L3"
+
+[roles.researcher]
+permissions = { allow = ["Read(sources/**)", "Read(notes/**)", "Write(notes/**)", "WebFetch"] }
+max_instances = 4
+can_message = ["researcher", "editor"]
+budget = { tokens = 300_000 }
+[roles.editor]
+permissions = { allow = ["Read(notes/**)", "Write(report/**)"] }
+can_message = ["researcher"]
+[[channel]]
+name = "notes"
+paths = ["notes/**"]
+writers = ["researcher"]
+readers = ["researcher", "editor"]

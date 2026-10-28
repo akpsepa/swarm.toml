@@ -1,0 +1,35 @@
+# Flat peer group (RFC plan, "Draft scope of swarm.toml v0.1").
+[swarm]
+name = "literature-review"
+default = "deny"
+
+[identity]
+issuer = "enforcer"      # or "spiffe"
+
+[conformance]
+required = "L4"
+
+[roles.researcher]
+permissions = "agent-perms:profiles.web-read"
+max_instances = 5
+can_message = ["researcher", "editor"]
+budget = { tokens = 300_000 }
+
+[roles.editor]
+permissions = "agent-perms:profiles.writer"
+can_message = ["researcher"]
+
+[[channel]]
+name = "notes"
+paths = ["notes/**"]
+writers = ["researcher"]
+readers = ["researcher", "editor"]
+
+[[collective]]
+action = "report.publish"
+requested_by = "editor"
+requires_quorum = { of = "researcher", min = 3, independent = true }
+
+# Added for v0.1: a gated action must say which tool calls it covers.
+[actions]
+"report.publish" = ["Write(report/published/**)"]

@@ -1,0 +1,15 @@
+# expect: none
+# seed: non-delegable action held only by the root
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(src/**)", "mcp__git__push_main", "Agent"] }
+can_spawn = ["coder"]
+can_assign = ["coder"]
+[roles.coder]
+permissions = { allow = ["Read(src/**)"] }
+[delegation]
+non_delegable = ["git.push.main"]
+[actions]
+"git.push.main" = ["mcp__git__push_main"]

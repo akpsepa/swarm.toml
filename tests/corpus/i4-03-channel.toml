@@ -1,0 +1,18 @@
+# expect: I4
+# seed: task-list channel into the pusher
+[conformance]
+required = "L3"
+
+[roles.planner]
+permissions = { allow = ["Read(src/**)", "Write(tasks/**)"] }
+[roles.releaser]
+permissions = { allow = ["Read(tasks/**)", "mcp__git__push_main"] }
+[[channel]]
+name = "tasks"
+paths = ["tasks/**"]
+writers = ["planner"]
+readers = ["releaser"]
+[delegation]
+non_delegable = ["git.push.main"]
+[actions]
+"git.push.main" = ["mcp__git__push_main"]

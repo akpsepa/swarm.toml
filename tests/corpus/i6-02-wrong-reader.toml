@@ -1,0 +1,16 @@
+# expect: I6
+# seed: channel exists but omits the reader
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Write(shared/**)"] }
+[roles.b]
+permissions = { allow = ["Read(shared/**)"] }
+[roles.c]
+permissions = { allow = ["Read(shared/**)"] }
+[[channel]]
+name = "shared"
+paths = ["shared/**"]
+writers = ["a"]
+readers = ["b"]

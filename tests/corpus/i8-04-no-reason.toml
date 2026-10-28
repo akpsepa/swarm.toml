@@ -1,0 +1,9 @@
+# expect: I8
+# seed: allow_escape without a reason
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Read(src/**)"] }
+capabilities = ["code.exec", "model.call"]
+allow_escape = true

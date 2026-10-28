@@ -1,0 +1,548 @@
+{
+  "$defs": {
+    "Aggregation": {
+      "additionalProperties": false,
+      "properties": {
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Labels",
+          "type": "array"
+        },
+        "merge_by": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Merge By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "labels",
+        "merge_by"
+      ],
+      "title": "Aggregation",
+      "type": "object"
+    },
+    "Audit": {
+      "additionalProperties": false,
+      "properties": {
+        "sequences": {
+          "default": false,
+          "title": "Sequences",
+          "type": "boolean"
+        },
+        "path": {
+          "default": ".swarm/audit.jsonl",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "title": "Audit",
+      "type": "object"
+    },
+    "Budget": {
+      "additionalProperties": false,
+      "properties": {
+        "tokens": {
+          "description": "Input + output + cache-creation tokens per instance.",
+          "exclusiveMinimum": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tokens"
+      ],
+      "title": "Budget",
+      "type": "object"
+    },
+    "Channel": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Paths",
+          "type": "array"
+        },
+        "writers": {
+          "default": [],
+          "items": {
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Writers",
+          "type": "array"
+        },
+        "readers": {
+          "default": [],
+          "items": {
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Readers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "paths"
+      ],
+      "title": "Channel",
+      "type": "object"
+    },
+    "Collective": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)+$",
+          "title": "Action",
+          "type": "string"
+        },
+        "requested_by": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Requested By",
+          "type": "string"
+        },
+        "requires_quorum": {
+          "$ref": "#/$defs/Quorum"
+        }
+      },
+      "required": [
+        "action",
+        "requested_by",
+        "requires_quorum"
+      ],
+      "title": "Collective",
+      "type": "object"
+    },
+    "Conformance": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "default": "L1",
+          "enum": [
+            "L1",
+            "L2",
+            "L3",
+            "L4"
+          ],
+          "title": "Required",
+          "type": "string"
+        }
+      },
+      "title": "Conformance",
+      "type": "object"
+    },
+    "Delegation": {
+      "additionalProperties": false,
+      "properties": {
+        "attenuate": {
+          "default": true,
+          "title": "Attenuate",
+          "type": "boolean"
+        },
+        "max_depth": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Depth"
+        },
+        "non_delegable": {
+          "default": [],
+          "items": {
+            "maxLength": 128,
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)+$",
+            "type": "string"
+          },
+          "title": "Non Delegable",
+          "type": "array"
+        }
+      },
+      "title": "Delegation",
+      "type": "object"
+    },
+    "Identity": {
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "default": "enforcer",
+          "enum": [
+            "enforcer",
+            "spiffe"
+          ],
+          "title": "Issuer",
+          "type": "string"
+        },
+        "trust_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SPIFFE trust domain (issuer = spiffe).",
+          "title": "Trust Domain"
+        }
+      },
+      "title": "Identity",
+      "type": "object"
+    },
+    "InlinePermissions": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "default": [],
+          "items": {
+            "pattern": "^[A-Za-z_][\\w-]*(\\(.*\\))?$",
+            "type": "string"
+          },
+          "title": "Allow",
+          "type": "array"
+        },
+        "deny": {
+          "default": [],
+          "items": {
+            "pattern": "^[A-Za-z_][\\w-]*(\\(.*\\))?$",
+            "type": "string"
+          },
+          "title": "Deny",
+          "type": "array"
+        }
+      },
+      "title": "InlinePermissions",
+      "type": "object"
+    },
+    "Label": {
+      "additionalProperties": false,
+      "properties": {
+        "tools": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "paths": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "title": "Label",
+      "type": "object"
+    },
+    "Quorum": {
+      "additionalProperties": false,
+      "properties": {
+        "of": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Of",
+          "type": "string"
+        },
+        "min": {
+          "minimum": 1,
+          "title": "Min",
+          "type": "integer"
+        },
+        "independent": {
+          "default": true,
+          "title": "Independent",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "of",
+        "min"
+      ],
+      "title": "Quorum",
+      "type": "object"
+    },
+    "Role": {
+      "additionalProperties": false,
+      "properties": {
+        "permissions": {
+          "anyOf": [
+            {
+              "pattern": "^(agent-perms|claude):\\S+$",
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/InlinePermissions"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Permissions"
+        },
+        "max_instances": {
+          "default": 1,
+          "description": "Instances per run, counted cumulatively.",
+          "minimum": 1,
+          "title": "Max Instances",
+          "type": "integer"
+        },
+        "can_spawn": {
+          "default": [],
+          "items": {
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Can Spawn",
+          "type": "array"
+        },
+        "can_assign": {
+          "default": [],
+          "items": {
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Can Assign",
+          "type": "array"
+        },
+        "can_message": {
+          "default": [],
+          "items": {
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Can Message",
+          "type": "array"
+        },
+        "budget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Budget"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "capabilities": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 128,
+                "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)+$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "If set, the complete list of abstract capabilities, plus actions.",
+          "title": "Capabilities"
+        },
+        "allow_escape": {
+          "default": false,
+          "title": "Allow Escape",
+          "type": "boolean"
+        },
+        "escape_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Escape Reason"
+        }
+      },
+      "title": "Role",
+      "type": "object"
+    },
+    "SwarmMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Swarm name. Defaults to the directory name.",
+          "title": "Name"
+        },
+        "default": {
+          "enum": [
+            "deny",
+            "allow"
+          ],
+          "type": "string",
+          "default": "deny",
+          "description": "Decision for anything undeclared. Only 'deny' passes I10.",
+          "title": "Default"
+        },
+        "root": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9_-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Entry role. Defaults to every role no other role can spawn.",
+          "title": "Root"
+        }
+      },
+      "title": "SwarmMeta",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "swarm": {
+      "$ref": "#/$defs/SwarmMeta",
+      "default": {
+        "name": null,
+        "default": "deny",
+        "root": null
+      }
+    },
+    "identity": {
+      "$ref": "#/$defs/Identity",
+      "default": {
+        "issuer": "enforcer",
+        "trust_domain": null
+      }
+    },
+    "conformance": {
+      "$ref": "#/$defs/Conformance",
+      "default": {
+        "required": "L1"
+      }
+    },
+    "roles": {
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z][a-z0-9_-]*$": {
+          "$ref": "#/$defs/Role"
+        }
+      },
+      "propertyNames": {
+        "maxLength": 64
+      },
+      "title": "Roles",
+      "type": "object"
+    },
+    "delegation": {
+      "$ref": "#/$defs/Delegation",
+      "default": {
+        "attenuate": true,
+        "max_depth": null,
+        "non_delegable": []
+      }
+    },
+    "channel": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Channel"
+      },
+      "title": "Channel",
+      "type": "array"
+    },
+    "labels": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Label"
+      },
+      "default": {},
+      "title": "Labels",
+      "type": "object"
+    },
+    "aggregation": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Aggregation"
+      },
+      "title": "Aggregation",
+      "type": "array"
+    },
+    "collective": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Collective"
+      },
+      "title": "Collective",
+      "type": "array"
+    },
+    "audit": {
+      "$ref": "#/$defs/Audit",
+      "default": {
+        "sequences": false,
+        "path": ".swarm/audit.jsonl"
+      }
+    },
+    "actions": {
+      "default": {},
+      "patternProperties": {
+        "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)+$": {
+          "items": {
+            "pattern": "^[A-Za-z_][\\w-]*(\\(.*\\))?$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "propertyNames": {
+        "maxLength": 128
+      },
+      "title": "Actions",
+      "type": "object"
+    }
+  },
+  "required": [
+    "roles"
+  ],
+  "title": "swarm.toml v0.1",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/assemble-labs/swarm-toml/spec/swarm.schema.json"
+}

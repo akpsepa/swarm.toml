@@ -1,0 +1,14 @@
+# expect: none
+# seed: children use exactly the parent budget
+[conformance]
+required = "L3"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+budget = { tokens = 400_000 }
+[roles.worker]
+permissions = { allow = ["Read(docs/**)", "SendMessage"] }
+max_instances = 2
+can_message = ["lead"]
+budget = { tokens = 200_000 }

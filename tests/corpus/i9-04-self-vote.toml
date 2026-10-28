@@ -1,0 +1,14 @@
+# expect: I9
+# seed: requester is the voter role
+[conformance]
+required = "L3"
+
+[roles.reviewer]
+permissions = { allow = ["Read(report/**)"] }
+max_instances = 3
+[[collective]]
+action = "report.publish"
+requested_by = "reviewer"
+requires_quorum = { of = "reviewer", min = 2 }
+[actions]
+"report.publish" = ["Write(report/published/**)"]

@@ -1,0 +1,4 @@
+# expect: none
+# seed: Bash at L1: only warnings
+[roles.dev]
+permissions = { allow = ["Bash", "Read"] }

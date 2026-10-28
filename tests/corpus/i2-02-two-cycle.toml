@@ -1,0 +1,16 @@
+# expect: I2
+# seed: a spawns b spawns a, with a declared root
+[conformance]
+required = "L3"
+
+[swarm]
+root = "lead"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["a"]
+[roles.a]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["b"]
+[roles.b]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["a"]

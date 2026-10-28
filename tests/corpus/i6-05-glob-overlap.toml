@@ -1,0 +1,9 @@
+# expect: I6
+# seed: overlap only through a wildcard
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Write(out/*.json)"] }
+[roles.b]
+permissions = { allow = ["Read(out/report.json)"] }

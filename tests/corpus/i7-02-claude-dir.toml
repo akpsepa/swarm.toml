@@ -1,0 +1,7 @@
+# expect: I7
+# seed: role may write .claude/settings.json
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Edit(.claude/settings.json)"] }

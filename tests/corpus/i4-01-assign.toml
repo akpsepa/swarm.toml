@@ -1,0 +1,17 @@
+# expect: I4
+# seed: lead lacks push but can assign a role that has it
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(src/**)", "Agent"] }
+can_spawn = ["coder"]
+can_assign = ["coder", "releaser"]
+[roles.coder]
+permissions = { allow = ["Read(src/**)"] }
+[roles.releaser]
+permissions = { allow = ["Read(src/**)", "mcp__git__push_main"] }
+[delegation]
+non_delegable = ["git.push.main"]
+[actions]
+"git.push.main" = ["mcp__git__push_main"]

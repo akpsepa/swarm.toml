@@ -1,0 +1,14 @@
+# expect: I4
+# seed: flat peers that can assign each other
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Read(src/**)"] }
+can_assign = ["b"]
+[roles.b]
+permissions = { allow = ["Read(src/**)", "mcp__prod__delete"] }
+[delegation]
+non_delegable = ["prod.delete"]
+[actions]
+"prod.delete" = ["mcp__prod__delete"]

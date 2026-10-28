@@ -1,0 +1,8 @@
+# expect: I8
+# seed: code.exec + agent.launch
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Read(src/**)"] }
+capabilities = ["code.exec", "agent.launch"]

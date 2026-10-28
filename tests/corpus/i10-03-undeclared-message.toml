@@ -1,0 +1,14 @@
+# expect: I10
+# seed: can_message names an undeclared role
+[conformance]
+required = "L3"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+budget = { tokens = 1_000_000 }
+[roles.worker]
+permissions = { allow = ["Read(docs/**)", "SendMessage"] }
+max_instances = 2
+can_message = ["lead", "admin"]
+budget = { tokens = 200_000 }

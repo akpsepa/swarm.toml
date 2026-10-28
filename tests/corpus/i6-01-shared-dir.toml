@@ -1,0 +1,9 @@
+# expect: I6
+# seed: writer and reader share a dir with no channel
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Write(shared/**)"] }
+[roles.b]
+permissions = { allow = ["Read(shared/**)"] }

@@ -1,0 +1,7 @@
+# expect: I7
+# seed: unrestricted Write
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Write"] }

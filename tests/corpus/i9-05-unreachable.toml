@@ -1,0 +1,16 @@
+# expect: I9
+# seed: quorum min exceeds max_instances
+[conformance]
+required = "L3"
+
+[roles.editor]
+permissions = { allow = ["Read(report/**)"] }
+[roles.reviewer]
+permissions = { allow = ["Read(report/**)"] }
+max_instances = 3
+[[collective]]
+action = "report.publish"
+requested_by = "editor"
+requires_quorum = { of = "reviewer", min = 4 }
+[actions]
+"report.publish" = ["Write(report/published/**)"]

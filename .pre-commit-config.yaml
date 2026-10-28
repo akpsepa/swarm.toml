@@ -1,0 +1,15 @@
+# This repo's own hooks.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check
+        language: system
+        types: [python]
+      - id: swarm-check-examples
+        name: swarm check (spec examples)
+        entry: bash -c 'for d in spec/examples/*/; do uv run swarm check "$d" || exit $?; done'
+        language: system
+        pass_filenames: false
+        files: ^spec/examples/

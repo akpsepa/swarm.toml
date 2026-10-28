@@ -1,0 +1,8 @@
+# expect: I6
+# seed: instances of one role share files undeclared
+[conformance]
+required = "L3"
+
+[roles.worker]
+permissions = { allow = ["Read(tmp/**)", "Write(tmp/**)"] }
+max_instances = 3

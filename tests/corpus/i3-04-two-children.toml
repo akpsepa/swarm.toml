@@ -1,0 +1,15 @@
+# expect: I3
+# seed: two child roles together exceed parent
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["a", "b"]
+budget = { tokens = 500_000 }
+[roles.a]
+permissions = { allow = ["Read(docs/**)"] }
+budget = { tokens = 300_000 }
+[roles.b]
+permissions = { allow = ["Read(docs/**)"] }
+budget = { tokens = 300_000 }

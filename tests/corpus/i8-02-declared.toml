@@ -1,0 +1,8 @@
+# expect: I8
+# seed: declared code.exec + network.egress
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Read(src/**)"] }
+capabilities = ["code.exec", "network.egress"]

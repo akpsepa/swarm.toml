@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "web-read": {
+      "allow": ["Read(sources/**)", "Read(notes/**)", "Write(notes/**)", "Edit(notes/**)",
+                "WebFetch", "WebSearch", "SendMessage"]
+    },
+    "writer": {
+      "allow": ["Read(notes/**)", "Read(report/**)", "Write(report/**)", "Edit(report/**)",
+                "SendMessage"]
+    }
+  }
+}

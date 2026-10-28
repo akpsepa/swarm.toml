@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "read-only": {
+      "allow": ["Read(src/**)", "Read(tests/**)", "Grep(src/**)", "Grep(tests/**)", "SendMessage"]
+    },
+    "contributor": {
+      "extends": ["read-only"],
+      "allow": ["Write(src/**)", "Edit(src/**)", "Write(tests/**)", "Edit(tests/**)",
+                "Bash(uv run pytest:*)"]
+    },
+    "maintainer": {
+      "extends": ["contributor"],
+      "allow": ["Read(data/customers/**)", "mcp__crm__read", "Agent", "Bash"]
+    }
+  }
+}

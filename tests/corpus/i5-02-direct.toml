@@ -1,0 +1,21 @@
+# expect: I5
+# seed: one role reads both sources directly
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["a", "b", "merger"]
+[roles.a]
+permissions = { allow = ["Read(data/a/**)", "SendMessage"] }
+can_message = []
+[roles.b]
+permissions = { allow = ["Read(data/b/**)", "SendMessage"] }
+can_message = []
+[roles.merger]
+permissions = { allow = ["Read(data/**)"] }
+[labels]
+pii = { paths = ["data/a/**", "data/b/**"] }
+[[aggregation]]
+labels = ["pii"]
+merge_by = "lead"

@@ -1,0 +1,21 @@
+# expect: none
+# seed: pipeline with channels per stage
+[conformance]
+required = "L3"
+
+[roles.fetch]
+permissions = { allow = ["WebFetch", "Write(stage1/**)"] }
+[roles.clean]
+permissions = { allow = ["Read(stage1/**)", "Write(stage2/**)"] }
+[roles.publish]
+permissions = { allow = ["Read(stage2/**)", "Write(site/**)"] }
+[[channel]]
+name = "s1"
+paths = ["stage1/**"]
+writers = ["fetch"]
+readers = ["clean"]
+[[channel]]
+name = "s2"
+paths = ["stage2/**"]
+writers = ["clean"]
+readers = ["publish"]

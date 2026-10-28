@@ -1,0 +1,10 @@
+# expect: none
+# seed: escape-capable role with a stated reason
+[conformance]
+required = "L3"
+
+[roles.ops]
+permissions = { allow = ["Read(ops/**)", "WebFetch"] }
+capabilities = ["code.exec", "network.egress"]
+allow_escape = true
+escape_reason = "runs deploys from an isolated VM with no repo checkout"

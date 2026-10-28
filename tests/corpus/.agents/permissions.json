@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "lead": {"allow": ["Read(docs/**)", "Agent"]},
+    "worker": {"allow": ["Read(docs/**)"]},
+    "self-editor": {"allow": ["Read(docs/**)", "Edit(.agents/permissions.json)"]}
+  }
+}

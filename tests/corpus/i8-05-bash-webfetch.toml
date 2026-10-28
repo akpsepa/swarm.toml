@@ -1,0 +1,7 @@
+# expect: I8
+# seed: Bash plus WebFetch
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Bash(uv run:*)", "WebFetch"] }

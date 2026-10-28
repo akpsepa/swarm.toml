@@ -1,0 +1,10 @@
+# expect: none
+# seed: agent-perms reference resolved from .agents/permissions.json
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = "agent-perms:profiles.lead"
+can_spawn = ["worker"]
+[roles.worker]
+permissions = "agent-perms:profiles.worker"

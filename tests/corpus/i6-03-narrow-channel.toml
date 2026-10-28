@@ -1,0 +1,14 @@
+# expect: I6
+# seed: channel path narrower than the overlap
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Write(work/**)"] }
+[roles.b]
+permissions = { allow = ["Read(work/**)"] }
+[[channel]]
+name = "work-notes"
+paths = ["work/notes/**"]
+writers = ["a"]
+readers = ["b"]

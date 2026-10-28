@@ -1,0 +1,13 @@
+# expect: I1
+# seed: grandchild exceeds its own spawner
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(**)", "Write(out/**)", "Agent"] }
+can_spawn = ["mid"]
+[roles.mid]
+permissions = { allow = ["Read(src/**)", "Agent"] }
+can_spawn = ["leaf"]
+[roles.leaf]
+permissions = { allow = ["Read(src/**)", "Write(out/**)"] }

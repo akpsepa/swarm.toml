@@ -1,0 +1,16 @@
+# expect: I5
+# seed: a tool source plus a path source
+[conformance]
+required = "L3"
+
+[roles.analyst]
+permissions = { allow = ["Read(data/customers/**)", "mcp__crm__read"] }
+[roles.lead]
+permissions = { allow = ["Read(data/customers/**)", "mcp__crm__read"] }
+[labels]
+customer_data = { tools = ["crm.read"], paths = ["data/customers/**"] }
+[[aggregation]]
+labels = ["customer_data"]
+merge_by = "lead"
+[actions]
+"crm.read" = ["mcp__crm__read"]

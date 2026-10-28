@@ -1,0 +1,18 @@
+# expect: I1
+# seed: spawned role holds a non-delegable action
+[conformance]
+required = "L3"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "mcp__deploy__run", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+budget = { tokens = 1_000_000 }
+[roles.worker]
+permissions = { allow = ["Read(docs/**)", "mcp__deploy__run", "SendMessage"] }
+max_instances = 2
+can_message = ["lead"]
+budget = { tokens = 200_000 }
+[delegation]
+non_delegable = ["deploy.prod"]
+[actions]
+"deploy.prod" = ["mcp__deploy__run"]

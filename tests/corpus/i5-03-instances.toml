@@ -1,0 +1,18 @@
+# expect: I5
+# seed: multi-instance reader passes fragments to a peer
+[conformance]
+required = "L3"
+
+[roles.reader]
+permissions = { allow = ["Read(data/a/**)", "SendMessage"] }
+max_instances = 3
+can_message = ["sink"]
+[roles.sink]
+permissions = { allow = ["Read(docs/**)"] }
+[roles.boss]
+permissions = { allow = ["Read(data/a/**)"] }
+[labels]
+pii = { paths = ["data/a/**"] }
+[[aggregation]]
+labels = ["pii"]
+merge_by = "boss"

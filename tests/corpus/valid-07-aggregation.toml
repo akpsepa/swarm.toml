@@ -1,0 +1,15 @@
+# expect: none
+# seed: only the merger reads both labelled sources (v1 let worker read docs/** beyond lead; caught by I1)
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(data/a/**)", "Read(data/b/**)", "Read(docs/**)", "Agent"] }
+can_spawn = ["worker"]
+[roles.worker]
+permissions = { allow = ["Read(docs/**)"] }
+[labels]
+pii = { paths = ["data/a/**", "data/b/**"] }
+[[aggregation]]
+labels = ["pii"]
+merge_by = "lead"

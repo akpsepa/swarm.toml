@@ -1,0 +1,7 @@
+# expect: I8
+# seed: unrestricted Bash
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Bash(npm test:*)"] }

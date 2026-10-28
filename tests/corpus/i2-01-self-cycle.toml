@@ -1,0 +1,15 @@
+# expect: I2
+# seed: role spawns itself, no max_depth
+[conformance]
+required = "L3"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+budget = { tokens = 1_000_000 }
+[roles.worker]
+permissions = { allow = ["Read(docs/**)", "Agent", "SendMessage"] }
+max_instances = 2
+can_message = ["lead"]
+can_spawn = ["worker"]
+budget = { tokens = 200_000 }

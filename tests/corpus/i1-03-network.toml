@@ -1,0 +1,14 @@
+# expect: I1
+# seed: child gains network the parent lacks
+[conformance]
+required = "L3"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+budget = { tokens = 1_000_000 }
+[roles.worker]
+permissions = { allow = ["Read(docs/**)", "WebFetch", "SendMessage"] }
+max_instances = 2
+can_message = ["lead"]
+budget = { tokens = 200_000 }

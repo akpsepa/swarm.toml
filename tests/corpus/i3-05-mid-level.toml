@@ -1,0 +1,17 @@
+# expect: I3
+# seed: conservation fails at the middle of a chain
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["mid"]
+budget = { tokens = 2_000_000 }
+[roles.mid]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["leaf"]
+budget = { tokens = 1_000_000 }
+[roles.leaf]
+permissions = { allow = ["Read(docs/**)"] }
+max_instances = 5
+budget = { tokens = 250_000 }

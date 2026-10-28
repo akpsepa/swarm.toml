@@ -1,0 +1,23 @@
+# expect: I5
+# seed: fragments land in a shared channel read by a non-merger
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Read(data/a/**)", "Write(scratch/**)"] }
+[roles.b]
+permissions = { allow = ["Read(data/b/**)", "Write(scratch/**)"] }
+[roles.c]
+permissions = { allow = ["Read(scratch/**)"] }
+[roles.merger]
+permissions = { allow = ["Read(data/**)"] }
+[[channel]]
+name = "scratch"
+paths = ["scratch/**"]
+writers = ["a", "b"]
+readers = ["c"]
+[labels]
+pii = { paths = ["data/a/**", "data/b/**"] }
+[[aggregation]]
+labels = ["pii"]
+merge_by = "merger"

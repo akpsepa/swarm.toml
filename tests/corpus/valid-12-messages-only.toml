@@ -1,0 +1,15 @@
+# expect: none
+# seed: message edges carry no authority
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(src/**)", "mcp__git__push_main", "SendMessage"] }
+can_message = ["helper"]
+[roles.helper]
+permissions = { allow = ["Read(src/**)", "SendMessage"] }
+can_message = ["lead"]
+[delegation]
+non_delegable = ["git.push.main"]
+[actions]
+"git.push.main" = ["mcp__git__push_main"]

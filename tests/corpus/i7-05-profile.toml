@@ -1,0 +1,7 @@
+# expect: I7
+# seed: role may write the agent-perms file it references
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = "agent-perms:profiles.self-editor"

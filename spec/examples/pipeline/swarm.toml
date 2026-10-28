@@ -1,0 +1,37 @@
+# Delegating pipeline (RFC plan, "Draft scope of swarm.toml v0.1").
+[roles.lead]
+permissions = "agent-perms:profiles.maintainer"
+can_spawn = ["coder", "reviewer"]
+can_assign = ["coder", "reviewer"]
+budget = { tokens = 2_000_000 }
+
+[roles.coder]
+permissions = "agent-perms:profiles.contributor"
+capabilities = ["code.exec"]    # no network, no agent.launch
+max_instances = 3
+can_message = ["reviewer"]
+budget = { tokens = 400_000 }
+
+[roles.reviewer]
+permissions = "agent-perms:profiles.read-only"
+can_message = ["lead"]
+
+[delegation]
+attenuate = true
+max_depth = 2
+non_delegable = ["git.push.main"]
+
+[labels]
+customer_data = { tools = ["crm.read"], paths = ["data/customers/**"] }
+
+[[aggregation]]
+labels = ["customer_data"]
+merge_by = "lead"
+
+[audit]
+sequences = true
+
+# Added for v0.1: actions named above, mapped to the tool calls that perform them.
+[actions]
+"git.push.main" = ["Bash(git push origin main:*)", "Bash(git push -f origin main:*)"]
+"crm.read" = ["mcp__crm__read"]

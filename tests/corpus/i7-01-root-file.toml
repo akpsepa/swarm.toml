@@ -1,0 +1,7 @@
+# expect: I7
+# seed: role may write swarm.toml
+[conformance]
+required = "L3"
+
+[roles.a]
+permissions = { allow = ["Write(swarm.toml)"] }

@@ -1,0 +1,10 @@
+[swarm]
+name = "docs-bot"
+
+[roles.planner]
+can_spawn = ["writer"]
+can_assign = ["writer"]
+
+[roles.writer]
+permissions = "claude:.claude/agents/writer.md"
+can_message = ["planner"]

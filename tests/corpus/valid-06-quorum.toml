@@ -1,0 +1,22 @@
+# expect: none
+# seed: independent quorum (v1 lacked the editor->reviewer channel; the validator caught it)
+[conformance]
+required = "L3"
+
+[roles.editor]
+permissions = { allow = ["Read(report/**)", "Write(report/published/**)", "SendMessage"] }
+[roles.reviewer]
+permissions = { allow = ["Read(report/**)", "SendMessage"] }
+max_instances = 3
+can_message = ["editor"]
+[[channel]]
+name = "report"
+paths = ["report/**"]
+writers = ["editor"]
+readers = ["reviewer"]
+[[collective]]
+action = "report.publish"
+requested_by = "editor"
+requires_quorum = { of = "reviewer", min = 2 }
+[actions]
+"report.publish" = ["Write(report/published/**)"]

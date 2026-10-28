@@ -1,0 +1,14 @@
+# expect: I3
+# seed: 2 x 600k > 1M
+[conformance]
+required = "L3"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+budget = { tokens = 1_000_000 }
+[roles.worker]
+permissions = { allow = ["Read(docs/**)", "SendMessage"] }
+max_instances = 2
+can_message = ["lead"]
+budget = { tokens = 600_000 }

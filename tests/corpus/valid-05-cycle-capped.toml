@@ -1,0 +1,16 @@
+# expect: none
+# seed: self-spawning role capped by explicit max_depth
+[conformance]
+required = "L3"
+
+[swarm]
+root = "lead"
+[roles.lead]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["splitter"]
+[roles.splitter]
+permissions = { allow = ["Read(docs/**)", "Agent"] }
+can_spawn = ["splitter"]
+max_instances = 4
+[delegation]
+max_depth = 3
