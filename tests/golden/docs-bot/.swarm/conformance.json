@@ -1,0 +1,73 @@
+{
+  "target": "claude-code",
+  "claude_code": "2.1.312",
+  "required": "L1",
+  "clauses": [
+    {
+      "id": "static-validation",
+      "level": "L1",
+      "status": "enforced",
+      "how": "swarm check passes before compiling"
+    },
+    {
+      "id": "permissions",
+      "level": "L2",
+      "status": "enforced",
+      "how": "hook checks every call against the role's allow rules; Bash rules match each subcommand by prefix"
+    },
+    {
+      "id": "identity",
+      "level": "L3",
+      "status": "enforced",
+      "how": "role from hook agent_type/agent_id; root from --agent; spawn ledger keeps names and parents"
+    },
+    {
+      "id": "spawn-edges",
+      "level": "L3",
+      "status": "enforced",
+      "how": "PreToolUse on Agent: caller role vs can_spawn"
+    },
+    {
+      "id": "max-depth",
+      "level": "L3",
+      "status": "enforced",
+      "how": "depth from the spawn ledger at PreToolUse Agent"
+    },
+    {
+      "id": "max-instances",
+      "level": "L3",
+      "status": "enforced",
+      "how": "cumulative count of distinct agent_ids per role in the ledger"
+    },
+    {
+      "id": "assign-edges",
+      "level": "L3",
+      "status": "approximate",
+      "how": "no structured task API in 2.1.312: the Agent prompt and SendMessage to an instance the sender spawned are treated as assignments"
+    },
+    {
+      "id": "message-edges",
+      "level": "L3",
+      "status": "enforced",
+      "how": "PreToolUse on SendMessage: recipient name -> role via the ledger; unknown names and broadcasts denied"
+    },
+    {
+      "id": "default-deny",
+      "level": "L3",
+      "status": "enforced",
+      "how": "tools, roles and recipients not declared are denied"
+    },
+    {
+      "id": "channels:planner",
+      "level": "L3",
+      "status": "unenforced",
+      "how": "'planner' has Bash, whose paths the hook cannot see"
+    },
+    {
+      "id": "integrity",
+      "level": "L3",
+      "status": "approximate",
+      "how": "Write/Edit on protected paths denied; policy hash re-checked at SessionStart and every call, so a Bash edit blocks every later call but is not prevented"
+    }
+  ]
+}

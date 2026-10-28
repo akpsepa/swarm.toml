@@ -1,0 +1,70 @@
+{
+  "spec": "0.1",
+  "target": "claude-code",
+  "swarm": "docs-bot",
+  "hash": "sha256:04ba7b82b6aee532f72e05e14b0434378d39820666fe30cdad25430cd2e06d31",
+  "level": "L1",
+  "roots": [
+    "planner"
+  ],
+  "launcher": null,
+  "max_depth": 1,
+  "roles": {
+    "planner": {
+      "can_spawn": [
+        "writer"
+      ],
+      "can_assign": [
+        "writer"
+      ],
+      "can_message": [],
+      "budget": null,
+      "max_instances": 1,
+      "allow": null,
+      "caps": [
+        "agent.spawn",
+        "code.exec",
+        "network.egress"
+      ]
+    },
+    "writer": {
+      "can_spawn": [],
+      "can_assign": [],
+      "can_message": [
+        "planner"
+      ],
+      "budget": null,
+      "max_instances": 1,
+      "allow": [
+        "Read",
+        "Write(docs/**)",
+        "Edit(docs/**)",
+        "SendMessage"
+      ],
+      "caps": []
+    }
+  },
+  "channels": [],
+  "non_delegable": [],
+  "actions": {},
+  "labels": {},
+  "aggregation": [],
+  "collective": [],
+  "protected": [
+    ".claude/**",
+    ".claude/agents/writer.md",
+    ".swarm/**",
+    ".swarm/audit.jsonl",
+    "swarm.toml"
+  ],
+  "referenced": [
+    ".claude/agents/writer.md"
+  ],
+  "audit": {
+    "sequences": false,
+    "path": ".swarm/audit.jsonl"
+  },
+  "unenforced": [
+    "channels:planner"
+  ]
+}

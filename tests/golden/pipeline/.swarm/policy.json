@@ -1,0 +1,144 @@
+{
+  "spec": "0.1",
+  "target": "claude-code",
+  "swarm": "pipeline",
+  "hash": "sha256:0f7b6a3c9e611d2719907741e70bd3f9b3310efdb9ddcae75312e739c3a22ce5",
+  "level": "L1",
+  "roots": [
+    "lead"
+  ],
+  "launcher": null,
+  "max_depth": 2,
+  "roles": {
+    "lead": {
+      "can_spawn": [
+        "coder",
+        "reviewer"
+      ],
+      "can_assign": [
+        "coder",
+        "reviewer"
+      ],
+      "can_message": [],
+      "budget": {
+        "tokens": 2000000
+      },
+      "max_instances": 1,
+      "allow": [
+        "Read(data/customers/**)",
+        "mcp__crm__read",
+        "Agent",
+        "Bash",
+        "Write(src/**)",
+        "Edit(src/**)",
+        "Write(tests/**)",
+        "Edit(tests/**)",
+        "Bash(uv run pytest:*)",
+        "Read(src/**)",
+        "Read(tests/**)",
+        "Grep(src/**)",
+        "Grep(tests/**)",
+        "SendMessage"
+      ],
+      "caps": [
+        "agent.spawn",
+        "code.exec",
+        "network.egress"
+      ]
+    },
+    "coder": {
+      "can_spawn": [],
+      "can_assign": [],
+      "can_message": [
+        "reviewer"
+      ],
+      "budget": {
+        "tokens": 400000
+      },
+      "max_instances": 3,
+      "allow": [
+        "Write(src/**)",
+        "Edit(src/**)",
+        "Write(tests/**)",
+        "Edit(tests/**)",
+        "Bash(uv run pytest:*)",
+        "Read(src/**)",
+        "Read(tests/**)",
+        "Grep(src/**)",
+        "Grep(tests/**)",
+        "SendMessage"
+      ],
+      "caps": [
+        "code.exec"
+      ]
+    },
+    "reviewer": {
+      "can_spawn": [],
+      "can_assign": [],
+      "can_message": [
+        "lead"
+      ],
+      "budget": null,
+      "max_instances": 1,
+      "allow": [
+        "Read(src/**)",
+        "Read(tests/**)",
+        "Grep(src/**)",
+        "Grep(tests/**)",
+        "SendMessage"
+      ],
+      "caps": []
+    }
+  },
+  "channels": [],
+  "non_delegable": [
+    "git.push.main"
+  ],
+  "actions": {
+    "git.push.main": [
+      "Bash(git push origin main:*)",
+      "Bash(git push -f origin main:*)"
+    ],
+    "crm.read": [
+      "mcp__crm__read"
+    ]
+  },
+  "labels": {
+    "customer_data": {
+      "tools": [
+        "crm.read"
+      ],
+      "paths": [
+        "data/customers/**"
+      ]
+    }
+  },
+  "aggregation": [
+    {
+      "labels": [
+        "customer_data"
+      ],
+      "merge_by": "lead"
+    }
+  ],
+  "collective": [],
+  "protected": [
+    ".agents/permissions.json",
+    ".claude/**",
+    ".swarm/**",
+    ".swarm/audit.jsonl",
+    "swarm.toml"
+  ],
+  "referenced": [
+    ".agents/permissions.json"
+  ],
+  "audit": {
+    "sequences": true,
+    "path": ".swarm/audit.jsonl"
+  },
+  "unenforced": [
+    "channels:lead",
+    "channels:coder",
+    "escape:coder"
+  ]
+}

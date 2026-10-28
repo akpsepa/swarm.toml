@@ -1,0 +1,123 @@
+{
+  "spec": "0.1",
+  "target": "claude-code",
+  "swarm": "literature-review",
+  "hash": "sha256:b17ccc9f322c7628d8067cb7261818081551e182e4f6b76578821d7d20e9c25b",
+  "level": "L4",
+  "roots": [
+    "researcher",
+    "editor"
+  ],
+  "launcher": "swarm-launcher",
+  "max_depth": 0,
+  "roles": {
+    "researcher": {
+      "can_spawn": [],
+      "can_assign": [],
+      "can_message": [
+        "editor",
+        "researcher"
+      ],
+      "budget": {
+        "tokens": 300000
+      },
+      "max_instances": 5,
+      "allow": [
+        "Read(sources/**)",
+        "Read(notes/**)",
+        "Write(notes/**)",
+        "Edit(notes/**)",
+        "WebFetch",
+        "WebSearch",
+        "SendMessage"
+      ],
+      "caps": [
+        "network.egress"
+      ]
+    },
+    "editor": {
+      "can_spawn": [],
+      "can_assign": [],
+      "can_message": [
+        "researcher"
+      ],
+      "budget": null,
+      "max_instances": 1,
+      "allow": [
+        "Read(notes/**)",
+        "Read(report/**)",
+        "Write(report/**)",
+        "Edit(report/**)",
+        "SendMessage"
+      ],
+      "caps": []
+    },
+    "swarm-launcher": {
+      "can_spawn": [
+        "researcher",
+        "editor"
+      ],
+      "can_assign": [
+        "researcher",
+        "editor"
+      ],
+      "can_message": [],
+      "budget": null,
+      "max_instances": 1,
+      "allow": [
+        "Agent",
+        "SendMessage"
+      ],
+      "caps": [
+        "agent.spawn"
+      ]
+    }
+  },
+  "channels": [
+    {
+      "name": "notes",
+      "paths": [
+        "notes/**"
+      ],
+      "writers": [
+        "researcher"
+      ],
+      "readers": [
+        "researcher",
+        "editor"
+      ]
+    }
+  ],
+  "non_delegable": [],
+  "actions": {
+    "report.publish": [
+      "Write(report/published/**)"
+    ]
+  },
+  "labels": {},
+  "aggregation": [],
+  "collective": [
+    {
+      "action": "report.publish",
+      "requested_by": "editor",
+      "of": "researcher",
+      "min": 3,
+      "independent": true
+    }
+  ],
+  "protected": [
+    ".agents/permissions.json",
+    ".claude/**",
+    ".swarm/**",
+    ".swarm/audit.jsonl",
+    "swarm.toml"
+  ],
+  "referenced": [
+    ".agents/permissions.json"
+  ],
+  "audit": {
+    "sequences": false,
+    "path": ".swarm/audit.jsonl"
+  },
+  "unenforced": []
+}

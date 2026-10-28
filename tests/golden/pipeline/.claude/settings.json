@@ -1,0 +1,85 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent",
+      "Bash",
+      "Edit",
+      "Grep",
+      "Read",
+      "SendMessage",
+      "Write",
+      "mcp__crm__read"
+    ],
+    "deny": [
+      "Edit(./.agents/permissions.json)",
+      "Edit(./.claude/**)",
+      "Edit(./.swarm/**)",
+      "Edit(./.swarm/audit.jsonl)",
+      "Edit(./swarm.toml)",
+      "Write(./.agents/permissions.json)",
+      "Write(./.claude/**)",
+      "Write(./.swarm/**)",
+      "Write(./.swarm/audit.jsonl)",
+      "Write(./swarm.toml)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook SessionStart",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook PreToolUse",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent|SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook PostToolUse",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook SubagentStart",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook SubagentStop",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

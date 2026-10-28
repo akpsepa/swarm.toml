@@ -1,0 +1,90 @@
+{
+  "permissions": {
+    "allow": [
+      "Agent",
+      "Bash",
+      "Edit",
+      "Glob",
+      "Grep",
+      "LS",
+      "MultiEdit",
+      "NotebookEdit",
+      "Read",
+      "SendMessage",
+      "WebFetch",
+      "WebSearch",
+      "Write"
+    ],
+    "deny": [
+      "Edit(./.claude/**)",
+      "Edit(./.claude/agents/writer.md)",
+      "Edit(./.swarm/**)",
+      "Edit(./.swarm/audit.jsonl)",
+      "Edit(./swarm.toml)",
+      "Write(./.claude/**)",
+      "Write(./.claude/agents/writer.md)",
+      "Write(./.swarm/**)",
+      "Write(./.swarm/audit.jsonl)",
+      "Write(./swarm.toml)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook SessionStart",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook PreToolUse",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent|SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook PostToolUse",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook SubagentStart",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "swarm-hook SubagentStop",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
