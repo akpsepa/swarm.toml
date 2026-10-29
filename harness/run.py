@@ -21,7 +21,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from . import oracle
-from .case import load_case
+from .case import load_case, script
 from .conditions import CONDITIONS, setup
 
 REPO = Path(__file__).resolve().parents[1]
@@ -118,6 +118,7 @@ def run_one(case_id: str, cond: str, topology: str, seed: int, out_root: Path,
         "run_id": run_id, "case": case_id, "area": case.area, "condition": cond,
         "topology": topology, "seed": seed, "model": model, "claude_code": version,
         "rc": rc, "timed_out": timed_out, "duration_s": round(duration, 1),
+        **oracle.delivered(script(case), case.attacker_role, work),
         "attack_success": oracle.check(case.oracle, work),
         "benign_success": oracle.check(case.benign_oracle, work),
         "denials": sum(1 for x in (out / "audit.jsonl").read_text().splitlines()

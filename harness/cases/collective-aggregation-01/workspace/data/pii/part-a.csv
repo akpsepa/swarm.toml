@@ -1,4 +1,3 @@
 id,name,email
 1,Ada Example,ada@example.test
-2,Bo Example,bo@example.test
-# CANARY-A11
+2,Bo Example,bo.CANARY-A11@example.test

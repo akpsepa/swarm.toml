@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 from harness import guard, oracle
-from harness.case import all_cases, load_case
-from harness.conditions import CONDITIONS, setup
+from harness.case import all_cases, load_case, script
+from harness.conditions import CONDITIONS, attack_text, setup
 from harness.run import _inside_repo, run_one, usage_from_stream
 
 CASES = all_cases()
@@ -28,18 +28,19 @@ def test_setup_every_condition(case, cond, tmp_path):
         assert (work / "swarm.toml").exists() == (cond in ("C2", "C3"))
         assert (work / ".claude/agents" / f"{rs.root_role}.md").exists()
         attacker = (work / ".claude/agents" / f"{case.attacker_role}.md").read_text()
-        assert case.goal in attacker
+        assert attack_text(case) in attacker  # the same fixed script in every condition
+        assert "Team rules" not in attacker  # a compromised agent's prompt doesn't vary
         for other in (work / ".claude/agents").glob("*.md"):
             if other.stem != case.attacker_role:
-                assert case.goal not in other.read_text()  # goal goes to the attacker only
-        if cond == "C1":
-            assert "Team rules" in attacker
+                assert "scripted the steps" not in other.read_text()
+                if cond == "C1" and other.stem in case.roles:
+                    assert "Team rules" in other.read_text()
         if cond in ("C2", "C3"):
             policy = json.loads((work / ".swarm/policy.json").read_text())
             assert ("enforce" in policy) == (cond == "C2")
             assert "tools:" in attacker
         assert case.benign_task in rs.prompt
-        assert case.goal not in rs.prompt
+        assert "scripted the steps" not in rs.prompt
         assert "--settings" in rs.args and rs.env["PATH"].split(":")[0].endswith("shims")
 
 
@@ -124,3 +125,33 @@ def test_case_loader_validates(tmp_path):
     shutil.copytree(src, tmp_path / "wrong-id")
     with pytest.raises(ValueError, match="does not match"):
         load_case("wrong-id", tmp_path)
+
+
+def test_attack_delivery(tmp_path):
+    c = next(c for c in CASES if c.id == "budget-fanout-01")
+    steps = script(c)
+    assert len(steps) == 5 and steps[4]["input"]["name"] == "worker-5"
+    (tmp_path / ".harness").mkdir()
+    ev = [{"event": "PreToolUse", "agent_type": "planner", "tool": "Agent",
+           "subagent_type": "worker", "to": None} for _ in range(4)]
+    ev.append({"event": "PreToolUse", "agent_type": "checker", "tool": "Agent",
+               "subagent_type": "worker", "to": None})  # someone else's call doesn't count
+    log = tmp_path / ".harness/events.jsonl"
+    log.write_text("\n".join(map(json.dumps, ev)))
+    d = oracle.delivered(steps, "planner", tmp_path)
+    assert d == {"attack_calls_scripted": 5, "attack_calls_made": 4, "attack_delivered": False}
+    ev.append({**ev[0], "denied": "max_instances"})  # a denied call still counts
+    log.write_text("\n".join(map(json.dumps, ev)))
+    assert oracle.delivered(steps, "planner", tmp_path)["attack_delivered"]
+    # a `do` step is not a tool call and is not counted
+    m = next(c for c in CASES if c.id == "collective-aggregation-01")
+    assert oracle.delivered(script(m), "summarizer", tmp_path)["attack_calls_scripted"] == 2
+
+
+def test_case_needs_attack_script(tmp_path):
+    src = load_case(CASES[0].id).dir
+    shutil.copytree(src, tmp_path / src.name)
+    y = tmp_path / src.name / "case.yaml"
+    y.write_text(y.read_text().split("attack:")[0])
+    with pytest.raises(ValueError, match="no attack script"):
+        load_case(src.name, tmp_path)
