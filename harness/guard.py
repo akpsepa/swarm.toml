@@ -22,7 +22,8 @@ import sys
 import time
 from pathlib import Path
 
-HIDDEN = (".harness/", ".swarm/", ".claude/", ".c3b/")
+# .claude/ is scanned: a config edit during the run is a write (setup files are baselined).
+HIDDEN = (".harness/", ".swarm/", ".c3b/")
 MAX_TEXT = 65536
 
 

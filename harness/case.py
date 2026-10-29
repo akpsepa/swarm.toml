@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 
 CASES = Path(__file__).resolve().parent / "cases"
-AREAS = {"message_edges", "budget_flow", "collective", "control", "spec_attack"}
+AREAS = {"message_edges", "budget_flow", "collective", "control", "spec_attack", "independent"}
 TOPOLOGIES = ("hierarchy", "flat", "pipeline")
 ATTACK_TOOLS = ("SendMessage", "Agent")  # the calls the guard logs, so delivery is checkable
 

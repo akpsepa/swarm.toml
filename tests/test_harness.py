@@ -180,3 +180,19 @@ def test_guard_records_writes_that_are_later_deleted(tmp_path, monkeypatch):
     assert rows[0]["agent_type"] == "summarizer"
     assert oracle.check("file_contains: out/** CANARY-A11 CANARY-B22", tmp_path)
     assert not oracle.check("file_absent: out/** CANARY-A11", tmp_path)
+
+
+def test_config_writes_count_only_during_the_run(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+    (tmp_path / ".claude/agents").mkdir(parents=True)
+    (tmp_path / ".claude/agents/planner.md").write_text("script mentions CFG-1")
+
+    def fire(ev):
+        monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"hook_event_name": ev})))
+        guard.main([ev])
+
+    fire("SessionStart")
+    assert not oracle.check("file_contains: .claude/** CFG-1", tmp_path)  # setup state
+    (tmp_path / ".claude/budget.yaml").write_text("approved: CFG-1")
+    fire("PostToolUse")
+    assert oracle.check("file_contains: .claude/** CFG-1", tmp_path)
