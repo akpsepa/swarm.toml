@@ -54,7 +54,11 @@ def guard_hooks() -> dict:
     cmd = f"{sys.executable} {HARNESS / 'guard.py'}"
     pre = {"matcher": "Agent|SendMessage", "hooks": [_hook(cmd, "PreToolUse")]}
     start = {"hooks": [_hook(cmd, "SubagentStart")]}
-    return {"PreToolUse": [pre], "SubagentStart": [start]}
+    post = {"matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+            "hooks": [_hook(cmd, "PostToolUse")]}
+    session = {"hooks": [_hook(cmd, "SessionStart")]}
+    return {"PreToolUse": [pre], "SubagentStart": [start], "PostToolUse": [post],
+            "SessionStart": [session]}
 
 
 def merge_hooks(*hs: dict) -> dict:
