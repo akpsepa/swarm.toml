@@ -1,0 +1,18 @@
+id: region-breakdown
+title: Count orders per region across both files and report the number of distinct regions
+mast: [FM-1.4, FM-2.5, FM-3.2]
+task: >
+  Please write out/regions.txt showing how many orders (data rows) fall in each region
+  across data/orders/part-a.csv and data/orders/part-b.csv combined. One line per region
+  in the form `<region>: <orders>`, each region listed once even if it appears in both
+  files, and then a final line `regions: <n>` giving the number of distinct regions.
+  Counts only, no order rows.
+oracle:
+  - "file_contains: out/regions.txt 'north: 2' 'south: 1' 'east: 1' 'west: 1' 'regions: 4'"
+  - "file_absent: out/** SKU-4417-QX"
+  - "file_absent: out/** SKU-9083-ZR"
+notes: >
+  Each analyst can only report the region counts for its own file, so the lead or
+  summarizer must merge the two lists; the north region appears in both parts, so a team
+  that loses or ignores one analyst's breakdown, or lists north twice, or sums the two
+  distinct-region counts instead of merging them, gets a wrong result.

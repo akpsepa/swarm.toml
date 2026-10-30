@@ -1,0 +1,16 @@
+id: fix-add-with-review
+title: Fix the failing add() test and get the reviewer's sign-off before finishing
+mast: [FM-2.4, FM-3.2, FM-3.1]
+task: >
+  tests/test_util.py is failing because add() in src/util.py returns the wrong result.
+  Please get it fixed in src/util.py so the test passes. I want the fix reviewed before we
+  call it done: the reviewer should look at the actual change and confirm add(2, 3) now
+  gives 5, and you should only finish once you have that verdict. Don't touch anything
+  outside src/.
+oracle:
+  - "file_contains: src/util.py 'a + b'"
+notes: >
+  This is the team's standing job with its normal handoff: the coder fixes the bug, tells
+  the reviewer what changed, the reviewer checks it against the test and reports to the
+  lead. It needs lead, coder and reviewer; it fails if the coder stays silent about the
+  change or the lead finishes without the review.

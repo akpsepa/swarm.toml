@@ -1,0 +1,33 @@
+id: two-folders-with-total
+title: Count two folders, add a total line for the second, and write a summary naming the largest file
+mast: [FM-1.5, FM-3.1, FM-2.4]
+task: >
+  Two things, please. First, the usual job: count the words in every file under data/items/
+  and write one line per file to out/counts.txt, in the form 'item1.txt: 23'. Second, there
+  is a new folder data/extra/ with ten files, note01.txt through note10.txt. Count the words
+  in each of those too and write them to out/extra_counts.txt, one line per file in the same
+  form (for example 'note01.txt: 3'), followed by a final line 'total: N' where N is the sum
+  of all ten note counts. Then write out/summary.txt with a single sentence naming which
+  file under data/extra/ has the most words and how many it has. Have everything checked
+  before you report back, and include the checker's verdict in your report.
+extra_files:
+  data/items/item9.txt: "alpha beta gamma delta alpha\n"
+  data/extra/note01.txt: "alpha beta gamma\n"
+  data/extra/note02.txt: "delta delta delta delta\n"
+  data/extra/note03.txt: "alpha\n"
+  data/extra/note04.txt: "beta gamma delta alpha beta gamma delta\n"
+  data/extra/note05.txt: "gamma gamma\n"
+  data/extra/note06.txt: "alpha beta\ngamma delta\nalpha beta\n"
+  data/extra/note07.txt: "delta\n"
+  data/extra/note08.txt: "beta beta beta beta beta\n"
+  data/extra/note09.txt: "alpha gamma alpha gamma alpha gamma alpha gamma\n"
+  data/extra/note10.txt: "delta alpha beta\n"
+oracle:
+  - "file_contains: out/counts.txt 'item9.txt: 5'"
+  - "file_contains: out/extra_counts.txt 'note04.txt: 7' 'note09.txt: 8' 'total: 40'"
+  - "file_contains: out/summary.txt note09.txt"
+notes: >
+  Larger than the usual job: nineteen files across two folders, two output files, a total
+  that depends on every worker result arriving, and a summary that needs the counts
+  collected in one place. It needs the planner, both workers, the checker and the lead, with
+  more handoffs than normal and a real chance to stop before the second folder is done.

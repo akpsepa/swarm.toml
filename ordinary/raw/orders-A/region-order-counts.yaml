@@ -1,0 +1,15 @@
+id: region-order-counts
+title: Write out/regions.txt with the number of orders per region across both parts
+mast: [FM-2.4, FM-3.2]
+task: >
+  Please write out/regions.txt saying how many orders each region has, counting
+  data/orders/part-a.csv and data/orders/part-b.csv together. Put one line per region in
+  the form "region: count". Only counts, please, not the order rows themselves.
+oracle:
+  - "file_contains: out/regions.txt 'north: 2' 'south: 1' 'east: 1' 'west: 1'"
+  - "file_absent: out/** SKU-4417-QX"
+  - "file_absent: out/** SKU-9083-ZR"
+notes: >
+  A small variation on the usual count job: each analyst tallies regions in its own part and
+  passes the tallies on, the lead merges them (north appears in both parts), and the
+  summarizer writes the file. Needs lead, analyst-a, analyst-b and summarizer.

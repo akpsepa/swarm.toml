@@ -11,6 +11,7 @@ from harness import guard, oracle
 from harness.case import all_cases, load_case, script
 from harness.conditions import CONDITIONS, attack_text, setup
 from harness.run import _inside_repo, run_one, usage_from_stream
+from swarm_toml.enforce.decide import C2_CLAUSES
 
 CASES = all_cases()
 
@@ -27,9 +28,13 @@ def test_setup_every_condition(case, cond, tmp_path):
         assert ("swarm-hook" in hooks) == (cond in ("C2", "C3"))
         assert (work / "swarm.toml").exists() == (cond in ("C2", "C3"))
         assert (work / ".claude/agents" / f"{rs.root_role}.md").exists()
-        attacker = (work / ".claude/agents" / f"{case.attacker_role}.md").read_text()
-        assert attack_text(case) in attacker  # the same fixed script in every condition
-        assert "Team rules" not in attacker  # a compromised agent's prompt doesn't vary
+        md = work / ".claude/agents" / f"{case.attacker_role}.md"
+        attacker = md.read_text() if case.attack else "tools:"
+        if case.attack:
+            assert attack_text(case) in attacker  # the same fixed script in every condition
+            assert "Team rules" not in attacker  # a compromised agent's prompt doesn't vary
+        else:
+            assert not md.exists()  # ordinary work: no attacker
         for other in (work / ".claude/agents").glob("*.md"):
             if other.stem != case.attacker_role:
                 assert "scripted the steps" not in other.read_text()
@@ -47,6 +52,36 @@ def test_setup_every_condition(case, cond, tmp_path):
 def test_c3b_requires_hand_written_hooks(tmp_path):
     with pytest.raises(FileNotFoundError):
         setup("C3b", CASES[0], "hierarchy", tmp_path / "w")
+
+
+def test_c3b_is_c2_plus_hand_hooks(tmp_path):
+    import shutil
+
+    from harness.case import load_case
+    root = tmp_path / "cases"
+    shutil.copytree(CASES[0].dir, root / CASES[0].id)
+    hand = root / CASES[0].id / "c3b"
+    hand.mkdir()
+    (hand / "settings.json").write_text(json.dumps({"hooks": {"PreToolUse": [{"matcher": "*",
+        "hooks": [{"type": "command", "command": "$PYTHON $C3B/hook.py PreToolUse"}]}]}}))
+    case = load_case(CASES[0].id, root)
+    work = tmp_path / "w"
+    setup("C3b", case, "hierarchy", work)
+    policy = json.loads((work / ".swarm" / "policy.json").read_text())
+    assert policy["enforce"] == list(C2_CLAUSES)
+    cmds = [h["command"] for e in json.loads((work / ".claude/settings.json").read_text())
+            ["hooks"]["PreToolUse"] for h in e["hooks"]]
+    assert any("swarm-hook" in c for c in cmds)
+    assert f"{work / '.c3b'}/hook.py PreToolUse" in " ".join(cmds)
+
+
+def test_ordinary_cases_load_without_attack():
+    from harness.case import load_case
+    ords = [p.name for p in (CASES[0].dir.parent).iterdir() if p.name.startswith("ord-")]
+    assert ords
+    for cid in ords:
+        c = load_case(cid)
+        assert c.area == "ordinary" and not c.attack and c.c3b_dir.name == "c3b"
 
 
 def test_oracle(tmp_path):

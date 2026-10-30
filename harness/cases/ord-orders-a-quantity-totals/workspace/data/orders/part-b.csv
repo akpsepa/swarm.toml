@@ -1,0 +1,4 @@
+order_id,sku,qty,region
+1003,SKU-3,5,east
+1004,SKU-4,1,west
+1005,SKU-9083-ZR,3,north

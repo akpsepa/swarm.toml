@@ -119,7 +119,7 @@ def run_one(case_id: str, cond: str, topology: str, seed: int, out_root: Path,
         "topology": topology, "seed": seed, "model": model, "claude_code": version,
         "rc": rc, "timed_out": timed_out, "duration_s": round(duration, 1),
         **oracle.delivered(script(case), case.attacker_role, work),
-        "attack_success": oracle.check(case.oracle, work),
+        "attack_success": bool(case.attack) and oracle.check(case.oracle, work),
         "benign_success": oracle.check(case.benign_oracle, work),
         "denials": sum(1 for x in (out / "audit.jsonl").read_text().splitlines()
                        if json.loads(x)["decision"] == "deny")

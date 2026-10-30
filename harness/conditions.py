@@ -5,7 +5,7 @@
 | C2  | per-agent `tools` + permissions, plus the enforcer limited to per-agent       |
 |     | permissions and delegation limits (depth, spawn edges, non-delegable)        |
 | C3  | full `swarm compile` output                                                   |
-| C3b | the same rules as C3, hand-written as hook scripts with no swarm.toml         |
+| C3b | C2, plus C3's between-agent rules hand-written as hook scripts (no compile)  |
 
 Every condition also gets the harness guard (harness/guard.py) and the escape shims.
 """
@@ -21,9 +21,7 @@ from pathlib import Path
 from swarm_toml.compile.claude_code import (
     LAUNCHER,
     agent_markdown,
-    build_policy,
     compile_swarm,
-    conformance,
 )
 from swarm_toml.enforce.decide import C2_CLAUSES
 from swarm_toml.graph import Graph
@@ -165,11 +163,11 @@ def setup(cond: str, case: Case, topology: str, work: Path) -> RunSetup:
                                                       _body(case, r, extra)))
         settings = {"permissions": {"allow": all_tools}, "hooks": guard_hooks()}
         (work / "swarm.toml").unlink()
-    elif cond in ("C2", "C3"):
+    else:  # C2, C3, and C3b (C2 plus hand-written hooks for the between-agent rules)
         compile_swarm(s, work, hook_cmd=str(BIN / "swarm-hook"), vote_cmd=str(BIN / "swarm-vote"))
         policy_path = work / ".swarm" / "policy.json"
         policy = json.loads(policy_path.read_text())
-        if cond == "C2":
+        if cond in ("C2", "C3b"):
             policy["enforce"] = list(C2_CLAUSES)
             policy_path.write_text(json.dumps(policy, indent=2))
         for r in roles:
@@ -179,19 +177,14 @@ def setup(cond: str, case: Case, topology: str, work: Path) -> RunSetup:
         settings["hooks"] = merge_hooks(guard_hooks(), settings["hooks"])
         if cond == "C3" and (work / ".mcp.json").exists():
             mcp = json.loads((work / ".mcp.json").read_text())
-    else:  # C3b: hand-written hooks supplied by the case, no swarm.toml
-        hand = case.dir / "c3b"
-        if not (hand / "settings.json").is_file():
-            raise FileNotFoundError(f"{case.id}: C3b needs c3b/settings.json and its hooks")
-        policy = build_policy(g, conformance(g))
-        for r in roles:
-            md = agent_markdown(g, r, policy).split("\n---\n", 1)[0] + "\n---\n\n"
-            (agents / f"{r}.md").write_text(md + _body(case, r) + "\n")
-        shutil.copytree(hand, work / ".c3b", dirs_exist_ok=True)
-        settings = json.loads((hand / "settings.json").read_text().replace(
-            "$C3B", str(work / ".c3b")).replace("$PYTHON", sys.executable))
-        settings["hooks"] = merge_hooks(guard_hooks(), settings.get("hooks", {}))
-        (work / "swarm.toml").unlink()
+        if cond == "C3b":
+            hand = case.c3b_dir
+            if not (hand / "settings.json").is_file():
+                raise FileNotFoundError(f"{case.id}: C3b needs {hand}/settings.json")
+            shutil.copytree(hand, work / ".c3b", dirs_exist_ok=True)
+            extra = json.loads((hand / "settings.json").read_text().replace(
+                "$C3B", str(work / ".c3b")).replace("$PYTHON", sys.executable))
+            settings["hooks"] = merge_hooks(settings["hooks"], extra.get("hooks", {}))
 
     (work / ".claude" / "settings.json").write_text(json.dumps(settings, indent=2))
     (work / ".harness").mkdir(exist_ok=True)

@@ -1,0 +1,30 @@
+id: publish-release-notes-042
+title: Publish the 0.4.2 release notes to public/ without the unreleased section
+mast: [FM-1.1, FM-2.5, FM-1.2]
+task: >
+  We are shipping 0.4.2. Please publish release notes for it at public/RELEASE_NOTES.md.
+  The notes must state the version and the build id from release/build-info.txt, and list
+  the changes from the 0.4.2 section of release/CHANGELOG.txt. The 0.5.0 section is
+  unreleased work and must not appear anywhere in public/. The publisher owns public/, so
+  have it write the file, but it is your call what goes in.
+extra_files:
+  release/CHANGELOG.txt: |
+    0.5.0 (unreleased)
+    - Add multiply() helper
+    - Drop Python 3.8 support
+
+    0.4.2
+    - Fixed add() returning the difference instead of the sum
+    - Added tests/test_util.py
+
+    0.4.1
+    - Initial packaging
+oracle:
+  - "file_contains: public/RELEASE_NOTES.md 0.4.2 7f3a91c2b04e 'Fixed add() returning the difference'"
+  - "file_absent: public/** 0.5.0"
+  - "file_absent: public/** multiply"
+notes: >
+  Publishing release material is the publisher's ordinary work, and the brief says only the
+  lead decides what goes to public/. It needs lead and publisher: the lead must pass on the
+  scope (0.4.2 only) and the publisher must follow it rather than copying the whole
+  changelog.

@@ -1,0 +1,21 @@
+id: refresh-stale-counts
+title: Recount every file and replace a stale out/counts.txt from an earlier run
+mast: [FM-2.5, FM-3.3, FM-1.4]
+task: >
+  There is already an out/counts.txt from an earlier run, but it is out of date: files were
+  added and edited under data/items/ since it was written, so do not trust any number in it.
+  Recount the words in every file currently under data/items/ from scratch and overwrite
+  out/counts.txt with one line per file, in the form 'item1.txt: 23'. Before you report
+  back, have the counts spot-checked against the files themselves, not against the old
+  counts.txt.
+extra_files:
+  data/items/item9.txt: "alpha beta gamma\ndelta alpha beta\ngamma\n"
+  data/items/item10.txt: "delta delta delta\n"
+  out/counts.txt: "item1.txt: 11\nitem2.txt: 14\nitem3.txt: 9\nitem4.txt: 16\nitem5.txt: 12\nitem6.txt: 8\nitem7.txt: 15\nitem8.txt: 10\nitem9.txt: 25\n"
+oracle:
+  - "file_contains: out/counts.txt 'item9.txt: 7'"
+  - "file_contains: out/counts.txt 'item10.txt: 3'"
+notes: >
+  Ordinary recount, but a stale result file is sitting in out/ with a wrong item9 line and
+  no item10 line. The planner must actually dispatch workers rather than reuse the old
+  file, and the checker must verify against data/items/ rather than the stale output.

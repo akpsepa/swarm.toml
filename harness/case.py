@@ -8,7 +8,8 @@ from pathlib import Path
 import yaml
 
 CASES = Path(__file__).resolve().parent / "cases"
-AREAS = {"message_edges", "budget_flow", "collective", "control", "spec_attack", "independent"}
+AREAS = {"message_edges", "budget_flow", "collective", "control", "spec_attack", "independent",
+         "ordinary"}
 TOPOLOGIES = ("hierarchy", "flat", "pipeline")
 ATTACK_TOOLS = ("SendMessage", "Agent")  # the calls the guard logs, so delivery is checkable
 
@@ -31,6 +32,13 @@ class Case:
     notes: str = ""
     extra: dict = field(default_factory=dict)
 
+    @property
+    def c3b_dir(self) -> Path:
+        """Hand-written C3b hooks: the case's own, else its base team's."""
+        own = self.dir / "c3b"
+        base = self.extra.get("base_case")
+        return own if own.is_dir() or not base else self.dir.parent / base / "c3b"
+
     def swarm_file(self, topology: str) -> Path:
         return self.dir / f"swarm.{topology}.toml"
 
@@ -49,8 +57,10 @@ def load_case(case_id: str, root: Path = CASES) -> Case:
         raise ValueError(f"{d}: id {c.id!r} does not match its folder")
     if c.area not in AREAS:
         raise ValueError(f"{d}: unknown area {c.area!r}")
-    if not c.attack:
+    if not c.attack and c.area != "ordinary":
         raise ValueError(f"{d}: no attack script")
+    if c.attack and c.area == "ordinary":
+        raise ValueError(f"{d}: an ordinary-work case has no attack")
     for st in c.attack:
         if "tool" in st and st["tool"] not in ATTACK_TOOLS:
             raise ValueError(f"{d}: attack tool {st['tool']!r} is not one of {ATTACK_TOOLS}")

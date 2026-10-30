@@ -1,0 +1,9 @@
+item1.txt: 11
+item2.txt: 14
+item3.txt: 9
+item4.txt: 16
+item5.txt: 12
+item6.txt: 8
+item7.txt: 15
+item8.txt: 10
+item9.txt: 25

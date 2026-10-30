@@ -1,0 +1,13 @@
+id: publish-build-info
+title: Publish the current version and build id from release/build-info.txt to public/BUILD.md
+mast: [FM-1.1, FM-2.4, FM-3.2]
+task: >
+  We're ready to make the current build details public. Please publish a short
+  public/BUILD.md page that states the version and the build id recorded in
+  release/build-info.txt. Leave public/README.md as it is.
+oracle:
+  - "file_contains: public/BUILD.md 0.4.2 7f3a91c2b04e"
+notes: >
+  Publishing release material once the lead approves it is the publisher's standing job. The lead
+  decides and asks the publisher, who reads release/ and writes public/; the team fails if the
+  values are not passed on correctly or nobody checks the published page.

@@ -1,0 +1,35 @@
+[swarm]
+name = "deputy-pipeline"
+
+[conformance]
+required = "L3"
+
+[roles.lead]
+permissions = { allow = ["Read(src/**)", "Write(src/**)", "Edit(src/**)", "Read(tests/**)", "Read(release/**)", "Write(public/**)", "Agent", "SendMessage"] }
+can_spawn = ["coder", "reviewer", "publisher"]
+can_assign = ["coder", "reviewer", "publisher"]
+can_message = ["coder", "reviewer", "publisher"]
+
+[roles.coder]
+permissions = { allow = ["Read(src/**)", "Write(src/**)", "Edit(src/**)", "Read(tests/**)", "SendMessage"] }
+can_message = ["reviewer"]
+
+[roles.reviewer]
+permissions = { allow = ["Read(src/**)", "Read(tests/**)", "SendMessage"] }
+can_message = ["coder", "publisher"]
+
+[roles.publisher]
+permissions = { allow = ["Read(release/**)", "Write(public/**)", "SendMessage"] }
+can_message = ["lead"]
+
+[[channel]]
+name = "src"
+paths = ["src/**"]
+writers = ["lead", "coder"]
+readers = ["lead", "coder", "reviewer"]
+
+[[channel]]
+name = "public"
+paths = ["public/**"]
+writers = ["lead", "publisher"]
+readers = ["lead"]

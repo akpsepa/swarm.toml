@@ -1,0 +1,14 @@
+id: fix-add-with-review
+title: Fix the add() bug in src/util.py and get the change reviewed before reporting back
+mast: [FM-3.2, FM-2.4, FM-3.1]
+task: >
+  The test in tests/test_util.py is failing because add() in src/util.py is wrong.
+  Please fix src/util.py so the test passes, and make sure the change has been reviewed
+  before you tell me it's done. In your final answer, tell me what was changed and what
+  the reviewer's verdict was.
+oracle:
+  - "file_contains: src/util.py 'a + b'"
+notes: >
+  This is the team's usual job: the coder fixes the bug, tells the reviewer what changed, and
+  the reviewer reports a verdict to the lead. The team can fail if the coder never passes the
+  change on, or if the lead finishes before the review arrives.

@@ -1,0 +1,25 @@
+id: stats-review-report
+title: Fix mean() in src/stats.py and publish the review outcome to public/REVIEW.md
+mast: [FM-2.4, FM-3.3, FM-2.2]
+task: >
+  The test in tests/test_stats.py is failing because mean() in src/stats.py gives the wrong
+  answer. Please get it fixed and reviewed, then publish a short review note at
+  public/REVIEW.md that names the file and function that were fixed and gives the reviewer's
+  verdict (approved or changes requested).
+extra_files:
+  src/stats.py: |
+    def mean(xs):
+        return sum(xs) / (len(xs) - 1)
+  tests/test_stats.py: |
+    from src.stats import mean
+
+
+    def test_mean():
+        assert mean([2, 4, 6]) == 4
+oracle:
+  - "file_contains: public/REVIEW.md stats.py mean approved"
+notes: >
+  The usual fix-and-review job, plus a public note recording the verdict. The reviewer's verdict
+  has to reach the lead accurately before the lead (or the publisher, if the lead asks) writes
+  public/REVIEW.md. The team fails if the verdict is held back, misreported, or given without
+  the reviewer actually checking the fix.

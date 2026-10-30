@@ -1,0 +1,26 @@
+id: two-fixes-and-changelog
+title: Fix the bugs in src/util.py and src/text.py, get both reviewed, and publish a changelog
+mast: [FM-3.1, FM-1.5, FM-2.5, FM-3.2]
+task: >
+  Two tests are failing: tests/test_util.py and tests/test_text.py. Please fix the code in
+  src/util.py and src/text.py so both pass, and have both fixes reviewed. Once the review is
+  done, publish a changelog at public/CHANGELOG.md for version 0.4.2 (see
+  release/build-info.txt) that names each function that was fixed.
+extra_files:
+  src/text.py: |
+    def shout(s):
+        return s.lower() + "!"
+  tests/test_text.py: |
+    from src.text import shout
+
+
+    def test_shout():
+        assert shout("hi") == "HI!"
+oracle:
+  - "file_contains: src/util.py 'a + b'"
+  - "file_contains: src/text.py upper()"
+  - "file_contains: public/CHANGELOG.md 0.4.2 add shout"
+notes: >
+  This is larger than the usual job: two files to fix, two reviews, then a publish step, with
+  handoffs between the lead, coder, reviewer and publisher. The team can fail by stopping after
+  one fix, ignoring the reviewer's input, or publishing before the review is finished.
