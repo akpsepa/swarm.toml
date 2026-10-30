@@ -1,7 +1,8 @@
-"""Mechanical checks for red-team round 1 (redteam/PROTOCOL.md), then import accepted
-attacks as harness cases r1-<team>-<writer>-<id>.
+"""Mechanical checks for a red-team round (redteam/PROTOCOL.md), then import accepted
+attacks as harness cases r<round>-<team>-<writer>-<id>.
 
     uv run python -m redteam.validate ~/swarm-toml-runs/redteam/r1
+    uv run python -m redteam.validate ~/swarm-toml-runs/redteam/r2 2
 """
 
 from __future__ import annotations
@@ -86,8 +87,9 @@ def check(doc, base: Path, roles: set[str]) -> str | None:
 
 def main(argv: list[str]) -> int:
     src = Path(argv[0]).expanduser().resolve()
-    raw_dir = HERE / "round1" / "raw"
-    report = ["# Round 1: mechanical check", "",
+    rnd = int(argv[1]) if len(argv) > 1 else 1
+    raw_dir = HERE / f"round{rnd}" / "raw"
+    report = [f"# Round {rnd}: mechanical check", "",
               "| Case | Writer | Category | Attacker | Verdict |", "| --- | --- | --- | --- | --- |"]
     accepted = 0
     for wdir in sorted(src.iterdir()):
@@ -106,16 +108,16 @@ def main(argv: list[str]) -> int:
                 doc, why = None, f"R1 YAML error: {str(e).splitlines()[0]}"
             else:
                 why = check(doc, base_case / "workspace", roles)
-            cid = f"r1-{team}-{writer}-{(doc or {}).get('id') or f.stem}".lower()
+            cid = f"r{rnd}-{team}-{writer}-{(doc or {}).get('id') or f.stem}".lower()
             cat = (doc or {}).get("category", "?") if isinstance(doc, dict) else "?"
             who = (doc or {}).get("attacker_role", "?") if isinstance(doc, dict) else "?"
             report.append(f"| `{cid}` | {writer} | {cat} | {who} | "
                           f"{'accepted' if why is None else 'rejected: ' + why} |")
             if why is None:
-                _import(cid, doc, base_case)
+                _import(cid, doc, base_case, rnd)
                 accepted += 1
     report += ["", f"Accepted {accepted}. Edits made: none.", ""]
-    (HERE / "round1" / "REPORT.md").write_text("\n".join(report))
+    (HERE / f"round{rnd}" / "REPORT.md").write_text("\n".join(report))
     print("\n".join(report))
     return 0
 
@@ -126,7 +128,7 @@ def _with_toml(base_case: Path) -> Path:
     return t
 
 
-def _import(cid: str, doc: dict, base_case: Path) -> None:
+def _import(cid: str, doc: dict, base_case: Path, rnd: int = 1) -> None:
     base = yaml.safe_load((base_case / "case.yaml").read_text())
     d = CASES / cid
     if d.exists():
@@ -144,7 +146,7 @@ def _import(cid: str, doc: dict, base_case: Path) -> None:
         "benign_task": base["benign_task"], "canary": str(doc["oracle"]),
         "oracle": doc["oracle"], "benign_oracle": base["benign_oracle"],
         "roles": base["roles"], "attack": doc["attack"],
-        "notes": f"Red team round 1, {doc['category']}. {doc.get('rationale', '')}".strip(),
+        "notes": f"Red team round {rnd}, {doc['category']}. {doc.get('rationale', '')}".strip(),
         "category": doc["category"], "base_case": base_case.name,
     }
     (d / "case.yaml").write_text(yaml.safe_dump(case, sort_keys=False, allow_unicode=True))

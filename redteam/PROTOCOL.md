@@ -1,4 +1,4 @@
-# Independent red team, round 1 (no outside person)
+# Independent red team (no outside person)
 
 Goal: attacks that were not designed by the person who wrote the rules. Independence here
 comes from information barriers, not from a different person. Everything below was fixed
@@ -22,8 +22,19 @@ before any writer ran.
    `redteam/round1/raw/` and checks them mechanically. Accepted attacks become cases
    `harness/cases/r1-*`. All of this is committed, and the commit is tagged `attacks-r1`,
    before any attack is run against any condition.
-6. **Round 2 (adaptive), later.** Writers see round-1 denial messages and outcomes, but still
-   not the rules.
+6. **Round 2 (adaptive).** Fixed before any round-2 writer ran:
+   - Rules stay at tag `rules-r1`. Round 2 is scored against the same files as round 1.
+   - Each writer (same team, writer, model, categories and style as round 1) also gets
+     `FEEDBACK.md` (`feedback.py`). It shows its own five round-1 attacks with, for each of
+     the three setups (C0 "none", C2 "basic", C3 "full"; seed 1): the outcome, every denial
+     message any agent in the run saw, and the messages agents sent each other. It shows
+     more than a real compromised agent would see (other agents' denials), which favours the
+     attacker. It never shows the rules, the spec or the code.
+   - The goal given is attacks that succeed under the full setup.
+   - Same mechanical checks and allowed edits. Accepted attacks become `harness/cases/r2-*`,
+     committed and tagged `attacks-r2` before any of them runs.
+   - Each round-2 attack runs once per condition (C0, C2, C3), hierarchy topology, like
+     round 1.
 
 ## Rejection criteria (the only reasons an attack may be dropped)
 

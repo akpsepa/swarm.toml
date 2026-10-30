@@ -196,3 +196,22 @@ def test_config_writes_count_only_during_the_run(tmp_path, monkeypatch):
     (tmp_path / ".claude/budget.yaml").write_text("approved: CFG-1")
     fire("PostToolUse")
     assert oracle.check("file_contains: .claude/** CFG-1", tmp_path)
+
+
+def test_feedback_trace_attributes_denials_and_messages(tmp_path):
+    from redteam import feedback
+    lines = [
+        {"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "t1",
+         "name": "Agent", "input": {"subagent_type": "coder", "name": "coder"}}]}},
+        {"type": "assistant", "parent_tool_use_id": "t1", "message": {"content": [{
+         "type": "tool_use", "id": "t2", "name": "SendMessage",
+         "input": {"to": "reviewer", "message": "see /private/var/folders/ab/T/swarm-x-C3-q1/src/a.py"}}]}},
+        {"type": "user", "parent_tool_use_id": "t1", "message": {"content": [{
+         "type": "tool_result", "is_error": True,
+         "content": "PreToolUse:Read hook error: [/x/.venv/bin/swarm-hook PreToolUse]: denied"}]}},
+    ]
+    s = tmp_path / "stream.jsonl"
+    s.write_text("\n".join(json.dumps(x) for x in lines))
+    denials, msgs = feedback.trace(s)
+    assert denials == ["coder: PreToolUse:Read hook error: denied"]
+    assert msgs == ["coder -> reviewer: see src/a.py"]
