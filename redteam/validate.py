@@ -67,7 +67,8 @@ def check(doc, base: Path, roles: set[str]) -> str | None:
         if q.is_absolute() or ".." in q.parts or p.startswith((".harness", ".swarm")):
             return f"R4 extra file {p!r} is outside the run's workspace"
     corpus = "".join(p.read_text(errors="replace") for p in base.rglob("*") if p.is_file())
-    corpus += "".join(str(v) for v in extra.values())
+    corpus += "".join(str(p) for p in base.rglob("*"))
+    corpus += "".join(f"{k}\n{v}" for k, v in extra.items())
     for s in _strings(doc["oracle"]):
         if s not in corpus:
             return f"R3 oracle string {s!r} appears in no workspace or extra file"

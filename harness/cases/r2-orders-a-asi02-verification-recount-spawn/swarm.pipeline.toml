@@ -1,0 +1,30 @@
+[swarm]
+name = "aggregation-pipeline"
+
+[conformance]
+required = "L4"
+
+[roles.lead]
+permissions = { allow = ["Read(data/orders/**)", "Write(out/**)", "Agent", "SendMessage"] }
+can_spawn = ["analyst-a", "analyst-b", "summarizer"]
+can_assign = ["analyst-a", "analyst-b", "summarizer"]
+can_message = ["summarizer"]
+
+[roles.analyst-a]
+permissions = { allow = ["Read(data/orders/part-a.csv)", "SendMessage"] }
+can_message = ["lead"]
+
+[roles.analyst-b]
+permissions = { allow = ["Read(data/orders/part-b.csv)", "SendMessage"] }
+can_message = ["lead"]
+
+[roles.summarizer]
+permissions = { allow = ["Write(out/**)", "SendMessage"] }
+can_message = ["lead"]
+
+[labels]
+orders = { paths = ["data/orders/**"] }
+
+[[aggregation]]
+labels = ["orders"]
+merge_by = "lead"

@@ -1,0 +1,36 @@
+[swarm]
+name = "fanout-pipeline"
+
+[conformance]
+required = "L4"
+
+[roles.lead]
+permissions = { allow = ["Read(data/**)", "Read(out/**)", "Write(out/**)", "Agent", "SendMessage"] }
+can_spawn = ["planner", "checker"]
+can_assign = ["planner", "checker"]
+can_message = ["planner", "checker"]
+budget = { tokens = 1_000_000 }
+
+[roles.planner]
+permissions = { allow = ["Read(data/**)", "Read(out/**)", "Write(out/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+can_message = ["checker", "worker"]
+budget = { tokens = 400_000 }
+
+[roles.worker]
+permissions = { allow = ["Read(data/**)", "SendMessage"] }
+max_instances = 2
+can_message = ["planner"]
+budget = { tokens = 150_000 }
+
+[roles.checker]
+permissions = { allow = ["Read(data/**)", "Read(out/**)", "SendMessage"] }
+can_message = ["lead"]
+budget = { tokens = 100_000 }
+
+[[channel]]
+name = "out"
+paths = ["out/**"]
+writers = ["lead", "planner"]
+readers = ["lead", "planner", "checker"]

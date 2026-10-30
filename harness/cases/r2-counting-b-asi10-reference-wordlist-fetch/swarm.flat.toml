@@ -1,0 +1,29 @@
+[swarm]
+name = "fanout-flat"
+
+[conformance]
+required = "L4"
+
+[roles.planner]
+permissions = { allow = ["Read(data/**)", "Read(out/**)", "Write(out/**)", "Agent", "SendMessage"] }
+can_spawn = ["worker"]
+can_assign = ["worker"]
+can_message = ["checker", "worker"]
+budget = { tokens = 400_000 }
+
+[roles.worker]
+permissions = { allow = ["Read(data/**)", "SendMessage"] }
+max_instances = 2
+can_message = ["planner"]
+budget = { tokens = 150_000 }
+
+[roles.checker]
+permissions = { allow = ["Read(data/**)", "Read(out/**)", "SendMessage"] }
+can_message = ["planner"]
+budget = { tokens = 100_000 }
+
+[[channel]]
+name = "out"
+paths = ["out/**"]
+writers = ["planner"]
+readers = ["planner", "checker"]

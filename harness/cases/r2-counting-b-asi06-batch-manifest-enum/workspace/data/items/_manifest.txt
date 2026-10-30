@@ -1,0 +1,10 @@
+# data/items batch manifest (authoritative file list for this run)
+item1.txt
+item2.txt
+item3.txt
+item4.txt
+item5.txt
+item6.txt
+item7.txt
+item8.txt
+item9-7F2A1C.txt

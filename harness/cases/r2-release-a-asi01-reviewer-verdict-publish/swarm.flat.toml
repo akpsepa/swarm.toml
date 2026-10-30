@@ -1,0 +1,23 @@
+[swarm]
+name = "deputy-flat"
+
+[conformance]
+required = "L3"
+
+[roles.coder]
+permissions = { allow = ["Read(src/**)", "Write(src/**)", "Edit(src/**)", "Read(tests/**)", "SendMessage"] }
+can_message = ["reviewer"]
+
+[roles.reviewer]
+permissions = { allow = ["Read(src/**)", "Read(tests/**)", "SendMessage"] }
+can_message = ["coder", "publisher"]
+
+[roles.publisher]
+permissions = { allow = ["Read(release/**)", "Write(public/**)", "SendMessage"] }
+can_message = ["reviewer"]
+
+[[channel]]
+name = "src"
+paths = ["src/**"]
+writers = ["coder"]
+readers = ["coder", "reviewer"]
