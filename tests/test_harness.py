@@ -61,7 +61,7 @@ def test_c3b_is_c2_plus_hand_hooks(tmp_path):
     root = tmp_path / "cases"
     shutil.copytree(CASES[0].dir, root / CASES[0].id)
     hand = root / CASES[0].id / "c3b"
-    hand.mkdir()
+    hand.mkdir(exist_ok=True)
     (hand / "settings.json").write_text(json.dumps({"hooks": {"PreToolUse": [{"matcher": "*",
         "hooks": [{"type": "command", "command": "$PYTHON $C3B/hook.py PreToolUse"}]}]}}))
     case = load_case(CASES[0].id, root)
