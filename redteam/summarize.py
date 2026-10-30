@@ -70,9 +70,9 @@ def main(argv: list[str]) -> int:
             t["worked"] += bool(o["attack_delivered"] and o["attack_success"])
             t["task_ok"] += bool(o["benign_success"])
             t["timeouts"] += bool(o.get("timed_out"))
-        rows.append((case["category"], d.name.removeprefix("r1-"), oc))
+        rows.append((case["category"], d.name.split("-", 1)[1], oc))
 
-    print("# Round 1 results (hierarchy, one run each)\n")
+    print("# Results (hierarchy, one run each)\n")
     print("| Condition | Runs | Attack sent | Blocked before sending | Attack worked | Ordinary task done | Timeouts |")
     print("| --- | --- | --- | --- | --- | --- | --- |")
     for c in CONDS:
