@@ -1,0 +1,10 @@
+{"hooks": {
+  "SessionStart": [{"hooks": [
+    {"type": "command", "command": "$PYTHON $C3B/hook.py SessionStart", "timeout": 30}]}],
+  "PreToolUse": [{"matcher": "*", "hooks": [
+    {"type": "command", "command": "$PYTHON $C3B/hook.py PreToolUse", "timeout": 30}]}],
+  "PostToolUse": [{"matcher": "^(Agent|Task)$", "hooks": [
+    {"type": "command", "command": "$PYTHON $C3B/hook.py PostToolUse", "timeout": 30}]}],
+  "SubagentStart": [{"hooks": [
+    {"type": "command", "command": "$PYTHON $C3B/hook.py SubagentStart", "timeout": 30}]}]
+}}
