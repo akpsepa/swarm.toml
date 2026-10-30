@@ -50,8 +50,10 @@ def test_setup_every_condition(case, cond, tmp_path):
 
 
 def test_c3b_requires_hand_written_hooks(tmp_path):
+    root = tmp_path / "cases"
+    shutil.copytree(CASES[0].dir, root / CASES[0].id, ignore=shutil.ignore_patterns("c3b"))
     with pytest.raises(FileNotFoundError):
-        setup("C3b", CASES[0], "hierarchy", tmp_path / "w")
+        setup("C3b", load_case(CASES[0].id, root), "hierarchy", tmp_path / "w")
 
 
 def test_c3b_is_c2_plus_hand_hooks(tmp_path):
