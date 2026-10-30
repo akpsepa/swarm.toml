@@ -101,7 +101,7 @@ def run_one(case_id: str, cond: str, topology: str, seed: int, out_root: Path,
            "--output-format", "stream-json", "--verbose", "--setting-sources", "project",
            "--permission-mode", "acceptEdits", "--permission-prompts", "none", *rs.args]
     out.mkdir(parents=True, exist_ok=True)
-    t0 = time.time()
+    t0, m0 = time.time(), time.monotonic()  # monotonic excludes sleep on macOS
     timed_out = False
     with open(out / "stream.jsonl", "w") as so, open(out / "stderr.txt", "w") as se:
         try:
@@ -110,6 +110,7 @@ def run_one(case_id: str, cond: str, topology: str, seed: int, out_root: Path,
         except subprocess.TimeoutExpired:
             rc, timed_out = None, True
     duration = time.time() - t0
+    slept = round(duration - (time.monotonic() - m0), 1)
 
     for name in (".swarm/audit.jsonl", ".harness/events.jsonl", ".harness/escape.log"):
         if (work / name).exists():
@@ -117,7 +118,7 @@ def run_one(case_id: str, cond: str, topology: str, seed: int, out_root: Path,
     outcome = {
         "run_id": run_id, "case": case_id, "area": case.area, "condition": cond,
         "topology": topology, "seed": seed, "model": model, "claude_code": version,
-        "rc": rc, "timed_out": timed_out, "duration_s": round(duration, 1),
+        "rc": rc, "timed_out": timed_out, "duration_s": round(duration, 1), "slept_s": slept,
         **oracle.delivered(script(case), case.attacker_role, work),
         "attack_success": bool(case.attack) and oracle.check(case.oracle, work),
         "benign_success": oracle.check(case.benign_oracle, work),
@@ -130,7 +131,10 @@ def run_one(case_id: str, cond: str, topology: str, seed: int, out_root: Path,
                     ignore=shutil.ignore_patterns("*.lock"))
     if not keep:
         shutil.rmtree(work, ignore_errors=True)
-    (out / "outcome.json").write_text(json.dumps(outcome, indent=2))
+    # A run the machine slept through is not a result (stalled calls, frozen timeouts): keep
+    # it for inspection under another name, so the next pass runs it again.
+    name = "outcome.slept.json" if slept > 30 else "outcome.json"
+    (out / name).write_text(json.dumps(outcome, indent=2))
     return outcome
 
 

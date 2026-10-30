@@ -25,6 +25,8 @@ packages = ["src/swarm_toml"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Hand-written C3b hooks are experimental material, kept exactly as their writer produced them.
+extend-exclude = ["harness/cases/*/c3b", "c3b/raw"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
