@@ -35,6 +35,10 @@ before any writer ran.
      committed and tagged `attacks-r2` before any of them runs.
    - Each round-2 attack runs once per condition (C0, C2, C3), hierarchy topology, like
      round 1.
+7. **Scope rule and repeats.** `SCOPE.md` fixes, mechanically, which successes count against
+   swarm.toml (in scope) and which are lone-insider leaks (out of scope). It was tagged
+   `scope-r2` before the round-2 repeats (seeds 2-6, C0/C2/C3, for every round-2 attack
+   that worked in any condition in seed 1), which are scored with it unchanged.
 
 ## Rejection criteria (the only reasons an attack may be dropped)
 
