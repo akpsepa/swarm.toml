@@ -180,7 +180,7 @@ class Run:
         return d
 
 
-# --------------------------------------------------------------- session and identity
+# Session and identity
 
 def test_session_start_and_hash(hier):
     r = Run(hier)
@@ -249,7 +249,7 @@ def test_empty_ledger_defaults(hier):
     assert d.allow and ROOT in d.ledger["instances"]
 
 
-# --------------------------------------------------------------------------- spawn
+# Spawn
 
 def test_spawn_allowed_and_bound(hier):
     r = Run(hier)
@@ -341,7 +341,7 @@ def test_launcher_root(tmp_path):
     assert r.spawn("swarm-launcher", "x").rule == "default-deny"
 
 
-# ------------------------------------------------------------------------- messages
+# Messages
 
 def test_message_allowed_and_denied(hier):
     r = Run(hier)
@@ -371,7 +371,7 @@ def test_message_recipient_field(hier):
     assert r.call("SendMessage", recipient="r1", content="x").allow
 
 
-# --------------------------------------------------------------- files and permissions
+# Files and permissions
 
 def test_file_permissions(hier):
     r = Run(hier)
@@ -432,7 +432,7 @@ def test_rel_helper():
     assert _rel("./src/a", CWD) == "src/a"
 
 
-# ------------------------------------------------------------------------------ Bash
+# Bash
 
 def test_bash_prefix_rules(hier):
     r = Run(hier)
@@ -444,7 +444,7 @@ def test_bash_prefix_rules(hier):
     assert r.call("Bash", command="").rule == "permissions"
 
 
-# ------------------------------------------------------------- non-delegable, budget
+# Non-delegable, budget
 
 def test_non_delegable(hier):
     r = Run(hier)
@@ -464,7 +464,7 @@ def test_budget_exhausted(hier):
     r.ev("Stop", facts={})  # root stop without metering
 
 
-# ------------------------------------------------------------------------- collective
+# Collective
 
 def test_quorum_flow(tmp_path):
     p = policy_from(tmp_path, QUORUM)
@@ -547,7 +547,7 @@ def test_descends_from_handles_missing_parent(tmp_path):
     assert chain(led, "id-rv1") == ["reviewer"]
 
 
-# ------------------------------------------------------------------------ aggregation
+# Aggregation
 
 def test_aggregation_direct_reads(tmp_path):
     p = policy_from(tmp_path, AGG)

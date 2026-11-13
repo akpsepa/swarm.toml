@@ -104,7 +104,7 @@ def main() -> int:
            *([] if args.persist else ["--no-session-persistence"])]
     with open(out / "stream.jsonl", "w") as so, open(out / "stderr.txt", "w") as se:
         try:
-            rc = subprocess.run(cmd, cwd=work, env=env, stdout=so, stderr=se,
+            rc = subprocess.run(cmd, check=False, cwd=work, env=env, stdout=so, stderr=se,
                                 timeout=args.timeout).returncode
         except subprocess.TimeoutExpired:
             rc = "timeout"

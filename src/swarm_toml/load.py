@@ -110,7 +110,7 @@ class Swarm:
 
 def digest_files(root: Path, referenced: list[str]) -> str:
     """The policy hash: swarm.toml plus the referenced files (repo-relative), in order.
-    The enforcer recomputes this from disk on every call (R1)."""
+    The enforcer recomputes this from disk on every call."""
     h = hashlib.sha256()
     for rel in [FILENAME, *sorted(set(referenced))]:
         p = root / rel

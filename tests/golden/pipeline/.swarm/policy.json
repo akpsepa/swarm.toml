@@ -2,7 +2,7 @@
   "spec": "0.1",
   "target": "claude-code",
   "swarm": "pipeline",
-  "hash": "sha256:0f7b6a3c9e611d2719907741e70bd3f9b3310efdb9ddcae75312e739c3a22ce5",
+  "hash": "sha256:cefc1ff1cdc0b1aea7bbb494030b20ebc5058ba98f58de39ad2de5e4d823487f",
   "level": "L1",
   "roots": [
     "lead"

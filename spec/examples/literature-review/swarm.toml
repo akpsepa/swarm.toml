@@ -1,4 +1,4 @@
-# Flat peer group (RFC plan, "Draft scope of swarm.toml v0.1").
+# Flat peer group.
 [swarm]
 name = "literature-review"
 default = "deny"

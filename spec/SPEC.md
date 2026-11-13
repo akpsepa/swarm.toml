@@ -13,9 +13,9 @@ A **swarm** is a set of agent **instances**, each running as exactly one **role*
 | Edge | Field | Carries | Meaning |
 | --- | --- | --- | --- |
 | spawn | `can_spawn` | authority (attenuated), budget | An instance of A may start an instance of B |
-| assign | `can_assign` | authority | A may hand B a structured task. The only edge that carries instruction (R7) |
+| assign | `can_assign` | authority | A may hand B a structured task. The only edge that carries instruction |
 | message | `can_message` | data only | A may send B free text. The enforcer MUST deliver it labelled as untrusted peer data |
-| channel | `[[channel]]` | data, and authority when it holds tasks | Writers may write paths that readers read (R4) |
+| channel | `[[channel]]` | data, and authority when it holds tasks | Writers may write paths that readers read |
 
 The **communication graph** is the union of message edges and channel flows (writer → reader). The **authority graph** is the union of assign edges and channel flows. The **control graph** is the union of spawn and assign edges.
 
@@ -40,14 +40,14 @@ Name syntax:
 | `default` | `"deny"` \| `"allow"` | `"deny"` | Decision for anything undeclared. `"allow"` parses but fails I10; it exists so the error can be reported with a line |
 | `root` | role | every role no other role can spawn | Entry role. REQUIRED when every role is spawnable (see I2) |
 
-### 2.2 `[identity]` (R2)
+### 2.2 `[identity]`
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `issuer` | `"enforcer"` \| `"spiffe"` | `"enforcer"` | Who issues role credentials. An agent MUST NOT declare its own role |
 | `trust_domain` | string | none | SPIFFE trust domain, when `issuer = "spiffe"` |
 
-### 2.3 `[conformance]` (R5)
+### 2.3 `[conformance]`
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
@@ -77,7 +77,7 @@ At least one role is REQUIRED.
 | `max_depth` | integer ≥ 0 | the deepest declared spawn chain from a root | Spawns that would exceed this depth are refused. REQUIRED when the spawn graph has a cycle |
 | `non_delegable` | action[] | `[]` | Actions no spawned role may hold, and that no role may reach through assign edges or channels unless it holds them itself (I1, I4) |
 
-### 2.6 `[[channel]]` (R4)
+### 2.6 `[[channel]]`
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
@@ -88,7 +88,7 @@ At least one role is REQUIRED.
 
 A channel restricts and declares; it grants nothing. A role still needs per-agent permission to touch the paths. At L3+ the enforcer MUST refuse a read or write of a channel path by a role not listed.
 
-### 2.7 `[labels]` (R9)
+### 2.7 `[labels]`
 
 `[labels.<name>]` or `<name> = { ... }`:
 
@@ -104,7 +104,7 @@ A channel restricts and declares; it grants nothing. A role still needs per-agen
 | `labels` | label[] (≥ 1) | required | Restricted labels whose fragments may not be combined |
 | `merge_by` | role | required | The only role allowed to combine fragments (I5) |
 
-### 2.9 `[[collective]]` (R6)
+### 2.9 `[[collective]]`
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
@@ -121,7 +121,7 @@ A channel restricts and declares; it grants nothing. A role still needs per-agen
 | `sequences` | bool | `false` | Log action sequences per task, for detecting action splitting after the fact |
 | `path` | string | `".swarm/audit.jsonl"` | Audit log. Protected (I7) |
 
-### 2.11 `[actions]` (new in v0.1; not in the RFC draft)
+### 2.11 `[actions]`
 
 `"<action>" = [rule strings]` maps a project action to the tool calls that perform it, e.g. `"git.push.main" = ["Bash(git push origin main:*)"]`.
 
@@ -161,7 +161,7 @@ Patterned `deny` rules are ignored, so derived permissions over-approximate. Bar
 
 An enforcer at level L3 or above MUST provide the following.
 
-### 4.1 Identity (R2)
+### 4.1 Identity
 
 The enforcer binds a role credential to each instance at spawn. Every spawn, assignment, message and tool call is attributed to that credential, never to a claim the agent makes. A spawn MUST name a declared role.
 
@@ -175,15 +175,15 @@ A role's budget counts input, output and cache-creation tokens, **not** cache re
 
 Spawning an instance of B reserves `B.budget` from the spawner's remaining budget, and the spawn is refused if the remainder is too small. An instance whose metered use reaches its budget is refused further tool calls. Instances are counted cumulatively (§2.4), so respawning cannot reset a budget.
 
-### 4.4 Messages and assignments (R7)
+### 4.4 Messages and assignments
 
 A free-text message MUST be delivered marked as untrusted peer data. Only assign edges and channels carry instruction.
 
-### 4.5 Collective actions (R6)
+### 4.5 Collective actions
 
 A gated action is refused unless the quorum ledger holds at least `min` approvals for that request, from distinct voter instances that, when `independent`, were not spawned by the requester or its descendants.
 
-### 4.6 Integrity (R1)
+### 4.6 Integrity
 
 At load, the enforcer pins a sha256 over swarm.toml and every file it references. If the hash changes during a run, every call is refused until a restart with human review. No role may write the protected set: `swarm.toml`, referenced files, `.claude/**`, `.swarm/**` and the audit log.
 
@@ -193,19 +193,19 @@ If the enforcer cannot load or verify the policy, it refuses every call.
 
 ## 5. Static invariants
 
-`swarm check` evaluates these over the effective graph. I1–I2 follow AgentFlow; I3–I9 are new; I10 is the static half of default deny.
+`swarm check` evaluates these over the effective graph. I1–I2 are the usual attenuation and bounded-spawning checks; I3–I9 are specific to swarm.toml; I10 is the static half of default deny.
 
 | ID | Invariant | Class |
 | --- | --- | --- |
 | I1 | **Attenuation.** For every spawn edge A → B, every allow rule of B is contained in one of A's and every capability of B is held by A. No spawned role holds a `non_delegable` action | static, or runtime when a profile is unresolved or the fact is inferred |
 | I2 | **Bounded spawning.** The spawn graph is acyclic, or `max_depth` is set explicitly. At least one root exists | static |
 | I3 | **Budget conservation.** For every budgeted spawner A, the sum of `budget × max_instances` over the roles A can spawn is at most A's budget. A spawned role with no budget under a budgeted spawner is a *missing budget* | static; missing budget is runtime |
-| I4 | **No laundering over paths (R8).** For every `non_delegable` action X and every role R that does not hold X, no role reachable from R in the authority graph holds X | static, or runtime if the hold is inferred |
+| I4 | **No laundering over paths.** For every `non_delegable` action X and every role R that does not hold X, no role reachable from R in the authority graph holds X | static, or runtime if the hold is inferred |
 | I5 | **Aggregation closure (R9, experimental).** Any role that can receive two or more fragments of an aggregation's labels must be its `merge_by` role. See below | static if two declared fragments, else runtime |
-| I6 | **Declared channels (R4).** Whenever role A can write a path that role B can read (A ≠ B, or A = B with `max_instances` > 1), a channel with A among its writers and B among its readers covers it. Protected paths are excluded | runtime |
-| I7 | **Integrity (R1).** No role can write a protected path (§4.6) | static, or runtime if inferred |
-| I8 | **Escape (R3).** No role holds `code.exec` together with `network.egress`, `agent.launch` or `model.call` unless `allow_escape = true` with an `escape_reason`. `allow_escape` without a reason is an error | runtime; a missing reason is static |
-| I9 | **Independent voters (R6).** With `independent = true`, the requester is not the voter role and has no path in the control graph to it. In every quorum, `min ≤ max_instances` of the voter role | static |
+| I6 | **Declared channels.** Whenever role A can write a path that role B can read (A ≠ B, or A = B with `max_instances` > 1), a channel with A among its writers and B among its readers covers it. Protected paths are excluded | runtime |
+| I7 | **Integrity.** No role can write a protected path (§4.6) | static, or runtime if inferred |
+| I8 | **Escape.** No role holds `code.exec` together with `network.egress`, `agent.launch` or `model.call` unless `allow_escape = true` with an `escape_reason`. `allow_escape` without a reason is an error | runtime; a missing reason is static |
+| I9 | **Independent voters.** With `independent = true`, the requester is not the voter role and has no path in the control graph to it. In every quorum, `min ≤ max_instances` of the voter role | static |
 | I10 | **Default deny.** `default = "deny"`, and every role, label and action the file names is declared | static |
 
 **Fragments (I5).** A fragment is one source (path glob or tool) of one label, read by one role. Fragments flow along spawn, assign, message and channel edges. A role with `max_instances > 1` passes on each fragment once per instance, since instances may read different parts. The `merge_by` role is trusted to release combined results, so what it passes on carries no fragments. This over-approximates. It is experimental in v0.1, and results MUST report what it does not catch.
@@ -215,7 +215,7 @@ If the enforcer cannot load or verify the policy, it refuses every call.
 Each finding is static or runtime-dependent:
 
 - **Static** findings are always errors.
-- **Runtime-dependent** findings rest on facts only an enforcer can settle (an inferred fact, an unresolved profile, or a class the RFC lists as runtime: undeclared channels, missing budgets, escape-capable roles). They are **warnings at L1–L2 and errors at L3–L4**.
+- **Runtime-dependent** findings rest on facts only an enforcer can settle (an inferred fact, an unresolved profile, or a class marked runtime in the table above: undeclared channels, missing budgets, escape-capable roles). They are **warnings at L1–L2 and errors at L3–L4**.
 
 Adopting the file early therefore never blocks a merge over rules no one can enforce yet.
 
@@ -229,7 +229,7 @@ Adopting the file early therefore never blocks a merge over rules no one can enf
 
 Each finding prints as `path:line: severity Ik: message`. `--json` prints the findings, the level and the policy hash.
 
-## 6. Conformance (R5)
+## 6. Conformance
 
 | Level | The target guarantees |
 | --- | --- |
@@ -250,7 +250,7 @@ A compiler MUST list every clause the target cannot enforce. It MUST refuse to e
 
 ## 7. Not in v0.1
 
-These come from the red-team rows still open for decision (#11–#18). v0.1 takes the stated stopgap.
+Known gaps, numbered for reference. v0.1 takes the stated stopgap for each.
 
 | # | Gap | v0.1 stopgap |
 | --- | --- | --- |

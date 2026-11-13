@@ -2,6 +2,8 @@
 
 Each cell: runs where the attack worked / runs. In brackets: runs where the attacker's scripted call was made at all. **in**: of the runs where it worked, how many are in scope (`SCOPE.md`); the rest are lone-insider leaks.
 
+Run counts differ between conditions on purpose: which attacks were repeated, and under which conditions, is set out in `../SELECTION.md`.
+
 | Attack | C0 none | C2 basic | C3 full |
 | --- | --- | --- | --- |
 | `r1-counting-a-checker-fake-fail-fanout` | 1/6 (5) in 1 | 4/6 (6) in 4 | 0/6 (5) in 0 |

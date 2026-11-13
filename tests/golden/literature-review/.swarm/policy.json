@@ -2,7 +2,7 @@
   "spec": "0.1",
   "target": "claude-code",
   "swarm": "literature-review",
-  "hash": "sha256:b17ccc9f322c7628d8067cb7261818081551e182e4f6b76578821d7d20e9c25b",
+  "hash": "sha256:bdd5d3163b0b87a2c44fb240dafa6e650328b576b98a922d37634ffb685a2858",
   "level": "L4",
   "roots": [
     "researcher",

@@ -1,4 +1,4 @@
-# Delegating pipeline (RFC plan, "Draft scope of swarm.toml v0.1").
+# Delegating pipeline.
 [roles.lead]
 permissions = "agent-perms:profiles.maintainer"
 can_spawn = ["coder", "reviewer"]

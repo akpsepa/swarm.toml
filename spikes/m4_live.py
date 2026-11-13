@@ -12,8 +12,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
-from swarm_toml.compile.claude_code import compile_swarm  # noqa: E402
-from swarm_toml.load import load  # noqa: E402
+from swarm_toml.compile.claude_code import compile_swarm
+from swarm_toml.load import load
 
 BIN = Path(sys.executable).parent
 
@@ -85,7 +85,7 @@ def main() -> int:
            # project allow rules are ignored in an untrusted workspace; pass them directly
            "--settings", str(work / ".claude" / "settings.json")]
     with open(out / "stream.jsonl", "w") as so, open(out / "stderr.txt", "w") as se:
-        rc = subprocess.run(cmd, cwd=work, stdout=so, stderr=se, stdin=subprocess.DEVNULL,
+        rc = subprocess.run(cmd, check=False, cwd=work, stdout=so, stderr=se, stdin=subprocess.DEVNULL,
                             timeout=900).returncode
     shutil.copytree(work, out / "workspace", dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns("ledger.lock"))
@@ -95,7 +95,7 @@ def main() -> int:
     for line in (work / ".swarm/audit.jsonl").read_text().splitlines():
         r = json.loads(line)
         if r["event"] in ("PreToolUse", "SubagentStart", "SessionStart"):
-            print(f"{r['event']:13} {r['agent_type'] or '-':9} {str(r['tool']):12} "
+            print(f"{r['event']:13} {r['agent_type'] or '-':9} {r['tool']!s:12} "
                   f"{str(r['target'])[:40]:40} {r['decision']:5} {r['rule']}")
     return 0
 

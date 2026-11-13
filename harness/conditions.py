@@ -1,4 +1,4 @@
-"""Set up one run's workspace for a condition (implementation brief, "Key interfaces").
+"""Set up one run's workspace for a condition (docs/process/BRIEF.md, "Key interfaces").
 
 | C0  | no hooks; every role gets every tool                                         |
 | C1  | as C0, plus the swarm.toml rules written into each subagent's prompt         |

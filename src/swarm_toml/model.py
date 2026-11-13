@@ -23,7 +23,7 @@ ActionName = Annotated[
 # A permission rule in Claude Code / agent-perms syntax: "Tool" or "Tool(spec)".
 RuleString = Annotated[str, StringConstraints(pattern=r"^[A-Za-z_][\w-]*(\(.*\))?$")]
 
-# Abstract capabilities the validator reasons about (R3). Anything else in
+# Abstract capabilities the validator reasons about. Anything else in
 # `capabilities` is a project action, which must be defined under [actions].
 ABSTRACT_CAPS = frozenset({"code.exec", "network.egress", "agent.launch", "model.call"})
 

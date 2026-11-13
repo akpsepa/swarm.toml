@@ -70,7 +70,7 @@ def new_ledger() -> dict:
             "requests": {}, "frags": {}}
 
 
-# --------------------------------------------------------------------------- helpers
+# Helpers
 
 def _on(pol: dict, clause: str) -> bool:
     return clause in pol.get("enforce", CLAUSES)
@@ -217,7 +217,7 @@ def _would_aggregate(pol: dict, role: str, frags: set[str]) -> bool:
     return any(m != role and len(fs) >= 2 for m, fs in by_merger.items())
 
 
-# --------------------------------------------------------------------------- events
+# Events
 
 def _session_start(pol: dict, ev: HookEvent, led: dict) -> Decision:
     if ev.facts.get("hash") != pol["hash"]:

@@ -39,6 +39,8 @@ def main(argv: list[str]) -> int:
     print("Each cell: runs where the attack worked / runs. In brackets: runs where the "
           "attacker's scripted call was made at all. **in**: of the runs where it worked, how "
           "many are in scope (`SCOPE.md`); the rest are lone-insider leaks.\n")
+    print("Run counts differ between conditions on purpose: which attacks were repeated, and "
+          "under which conditions, is set out in `../SELECTION.md`.\n")
     print("| Attack | C0 none | C2 basic | C3 full |")
     print("| --- | --- | --- | --- |")
     for name, cells in rows:
