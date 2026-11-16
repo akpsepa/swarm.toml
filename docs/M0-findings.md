@@ -6,7 +6,7 @@
 - Claude Code: **2.1.312** (pin this for every run)
 - Model: `claude-sonnet-5-5` (`--model claude-sonnet-5-5`)
 - Spike: `spikes/m0_spike.py` with hook `spikes/hook_logger.py`. Three agents: `lead` (root, via `--agent lead`), `alpha` and `beta`, all defined in `.claude/agents/`.
-- Runs: `m0-run1` (dontAsk, failed writes), `m0-run2` (all checks pass, no persistence), `m0-run3` (all checks pass, persistence on) and `m0-nested` (lead → alpha → beta). Raw logs are in the session scratchpad and are not committed.
+- Runs: `m0-run1` (dontAsk, failed writes), `m0-run2` (all checks pass, no persistence), `m0-run3` (all checks pass, persistence on) and `m0-nested` (lead → alpha → beta). Raw logs are not committed.
 
 ## Checklist
 

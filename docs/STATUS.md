@@ -51,7 +51,7 @@ Notes on these results:
 ## Pre-registration (git tags)
 
 Each set of rules, attacks, tasks or scoring rules was tagged before the runs that use it.
-These tags replace the `prereg/` folder planned in `docs/process/BRIEF.md`.
+These tags take the place of a separate pre-registration folder.
 
 | Tag | Freezes | Tagged | First results using it |
 | --- | --- | --- | --- |
