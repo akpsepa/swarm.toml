@@ -9,7 +9,7 @@ approval from several agents. A checker validates it before anything runs, and a
 compiler turns it into hooks that enforce it at runtime (currently for Claude Code).
  
 
-Swarms of agents are becoming more common. Recent high-profile incidents show that there is a gap in their governance.
+Swarms of agents are becoming more common. Recent high-profile incidents (Hugging Face, 2026) show that there is a gap in their governance.
 
 ## Status
 
@@ -34,11 +34,15 @@ only (C2), and full swarm.toml (C3). The attacks were written by separate model 
 
 | Measure | No rules | Per-agent only | swarm.toml |
 | --- | --- | --- | --- |
-| Attacks that succeeded in scope (29 attacks × 6 runs) | 89/174 | 43/174 | 17/174 |
+| Attacks that succeeded in scope* (29 attacks × 6 runs) | 89/174 | 43/174 | 17/174 |
 | Ordinary tasks completed (24 tasks × 3 runs) | 100% | 94.4% | 91.7% |
 
+\*Out of scope means one agent misusing access its own role already has, which is a per-agent
+problem. Every other success counts against swarm.toml, including unclear ones; see `redteam/SCOPE.md`.
+
 Hand-written hooks enforcing the same rules gave the same protection, though at 344–515 lines of
-code per team against 9–13 lines of swarm.toml. The value is one shared, tested engine and a standard file, rather than stronger protection.
+code per team against 9–13 lines of swarm.toml (plus a shared 1,389-line engine, so swarm.toml
+is only smaller once several teams use it). The value is one shared, tested engine and a standard file, rather than stronger protection.
 
 What it doesn't cover yet: an agent misusing access its own role already has (most of the
 remaining successful attacks), many agents coordinating towards the same goal, and other
