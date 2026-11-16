@@ -54,7 +54,7 @@ Top-level keys by event (2.1.312). `agent_id` is present only for subagents.
 
 - **Do not** use `--dangerously-skip-permissions`; the local auto-mode classifier refuses it for spawned swarms.
 - `--permission-mode dontAsk` denied `Write` even with `Write` in `permissions.allow` (run 1). Use **`--permission-mode acceptEdits --permission-prompts none`** with an explicit `permissions.allow` list: anything that would prompt is denied.
-- Isolation: `--setting-sources project` (drops user hooks and plugins) and `--strict-mcp-config --mcp-config '{"mcpServers":{}}'`. Without the latter, the user's claude.ai connectors (Gmail, Drive and others) appeared in the swarm's tool list.
+- Isolation: `--setting-sources project` (drops user hooks and plugins) and `--strict-mcp-config --mcp-config '{"mcpServers":{}}'`. Without the latter, account-level MCP connectors appeared in the swarm's tool list.
 - Hooks run with exit 2 under `acceptEdits`. Permission denials happen independently of hooks: in run 1 both fired on the same call.
 
 ## Budget
